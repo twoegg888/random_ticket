@@ -1,0 +1,109 @@
+import { useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router';
+import { useApp } from '../context/AppContext';
+import svgPaths from "../../imports/svg-oofdos0zh0";
+import imgKakao from "figma:asset/152a75c45e952c474894abadfecac91956cd1209.png";
+import imgNaver from "figma:asset/e40d8ef429bc3b8aeece6edec09e51af6b4c17ab.png";
+
+const KAKAO_REST_API_KEY = 'f1f1ee7feb6098a7bc74cd41e7d787cc';
+
+export default function Login() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { isLoggedIn, isInitialized } = useApp();
+
+  const redirectUri = `${window.location.origin}/login/callback`;
+  
+  // 로그인 후 돌아갈 페이지 (state로 전달받음)
+  const from = (location.state as any)?.from?.pathname || '/';
+
+  // 초기화 완료 후, 이미 로그인된 경우 원래 가려던 페이지로 리다이렉트
+  useEffect(() => {
+    if (isInitialized && isLoggedIn) {
+      navigate(from, { replace: true });
+    }
+  }, [isInitialized, isLoggedIn, navigate, from]);
+
+  // 초기화가 완료되지 않았으면 로딩 화면 표시
+  if (!isInitialized) {
+    return (
+      <div className="bg-white relative w-[480px] mx-auto h-screen flex items-center justify-center">
+        <div className="w-16 h-16 border-4 border-gray-300 border-t-black rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
+  const handleKakaoLogin = () => {
+    const kakaoAuthUrl = `https://kauth.kakao.com/oauth/authorize?client_id=${KAKAO_REST_API_KEY}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code`;
+    window.location.href = kakaoAuthUrl;
+  };
+
+  const handleNaverLogin = () => {
+    alert('네이버 로그인은 준비 중입니다.');
+  };
+
+  return (
+    <div className="bg-white relative w-[480px] mx-auto h-screen">
+      {/* 상단 로고 */}
+      <div className="absolute bg-white h-[56px] left-0 right-0 top-0 flex items-center px-[20px]">
+        <div className="w-[30px] h-[27.84px]">
+          <svg className="size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 30 27.8571">
+            <g clipPath="url(#clip0_22_156)">
+              <path clipRule="evenodd" d={svgPaths.p1ff28800} fill="#FE6555" fillRule="evenodd" />
+            </g>
+            <defs>
+              <clipPath id="clip0_22_156">
+                <rect fill="white" height="27.8571" width="30" />
+              </clipPath>
+            </defs>
+          </svg>
+        </div>
+      </div>
+
+      {/* 타이틀 영역 */}
+      <div className="absolute left-0 right-0 top-[136px] px-[28px]">
+        <div className="flex flex-col gap-[15px] pb-[0.8px]">
+          <div className="font-['Inter:Semi_Bold','Noto_Sans_KR:Bold',sans-serif] font-semibold text-[26.25px] text-black leading-[28px]">
+            <p className="mb-0">안녕하세요,</p>
+            <p>랜덤티켓입니다</p>
+          </div>
+          <div className="font-['Inter:Regular','Noto_Sans_KR:Regular',sans-serif] font-normal text-[14.875px] text-[#666] leading-[20.8px]">
+            <p>로그인하고 다양한 혜택을 만나보세요!</p>
+          </div>
+        </div>
+      </div>
+
+      {/* 로그인 버튼 영역 */}
+      <div className="absolute bottom-[283px] left-0 right-0 flex flex-col gap-[16px] items-center justify-center p-[24px]">
+        {/* 카카오 로그인 버튼 */}
+        <button
+          onClick={handleKakaoLogin}
+          className="bg-[#f9df4a] rounded-[14px] w-full flex items-center justify-between pl-[20px] pr-[20.02px] py-[16px] hover:bg-[#f5d835] transition-colors"
+        >
+          <div className="size-[24px]">
+            <img src={imgKakao} alt="카카오" className="size-full" />
+          </div>
+          <div className="font-['Inter:Semi_Bold','Noto_Sans_KR:Bold',sans-serif] font-semibold text-[15px] text-black leading-[20.8px]">
+            카카오 로그인
+          </div>
+          <div className="size-[24px]" />
+        </button>
+
+        {/* 네이버 로그인 버튼 */}
+        <button
+          onClick={handleNaverLogin}
+          className="bg-[#51af35] rounded-[14px] w-full flex items-center justify-between pl-[20px] pr-[20.02px] py-[16px] hover:bg-[#489e2f] transition-colors opacity-50 cursor-not-allowed"
+          disabled
+        >
+          <div className="size-[24px]">
+            <img src={imgNaver} alt="네이버" className="size-full" />
+          </div>
+          <div className="font-['Inter:Semi_Bold','Noto_Sans_KR:Bold',sans-serif] font-semibold text-[15px] text-white leading-[20.8px]">
+            네이버 로그인
+          </div>
+          <div className="size-[24px]" />
+        </button>
+      </div>
+    </div>
+  );
+}
