@@ -32,9 +32,29 @@ const CHARGE_CATALOG: ChargeCatalogItem[] = [
 ];
 
 const CAFE24_MALL_ID = Deno.env.get("CAFE24_MALL_ID") || "";
+const CAFE24_CLIENT_ID = Deno.env.get("CAFE24_CLIENT_ID") || "";
+const CAFE24_CLIENT_SECRET = Deno.env.get("CAFE24_CLIENT_SECRET") || "";
+const CAFE24_REDIRECT_URI = Deno.env.get("CAFE24_REDIRECT_URI") || "";
 const CAFE24_ADMIN_ACCESS_TOKEN = Deno.env.get("CAFE24_ADMIN_ACCESS_TOKEN") || "";
+const CAFE24_REFRESH_TOKEN = Deno.env.get("CAFE24_REFRESH_TOKEN") || "";
+const CAFE24_ACCESS_TOKEN_EXPIRES_AT = Deno.env.get("CAFE24_ACCESS_TOKEN_EXPIRES_AT") || "";
+const CAFE24_REFRESH_TOKEN_EXPIRES_AT = Deno.env.get("CAFE24_REFRESH_TOKEN_EXPIRES_AT") || "";
 const CAFE24_SHOP_NO = Deno.env.get("CAFE24_SHOP_NO") || "1";
 const CAFE24_RETURN_BASE_URL = Deno.env.get("CAFE24_RETURN_BASE_URL") || "";
+const CAFE24_TOKEN_STORE_KEY = "cafe24:oauth_tokens";
+
+type Cafe24TokenStore = {
+  accessToken: string;
+  refreshToken?: string;
+  expiresAt?: string;
+  refreshTokenExpiresAt?: string;
+  mallId: string;
+  shopNo: string;
+  userId?: string;
+  scopes?: string[];
+  issuedAt?: string;
+  updatedAt: string;
+};
 
 function getChargeCatalogItem(productCode?: string | null, amount?: number | null): ChargeCatalogItem | null {
   if (productCode) {
@@ -100,11 +120,22 @@ function normalizeCafe24OrderId(payload: any): string | null {
 }
 
 function extractCafe24PaymentStatus(order: any): string {
-  return String(order?.payment_status || order?.paymentStatus || order?.status || "").toLowerCase();
+  return String(order?.payment_status || order?.paymentStatus || order?.paid || order?.status || "").toLowerCase();
+}
+
+function extractCafe24OrderStatus(order: any): string {
+  return String(order?.order_status || order?.orderStatus || "").toLowerCase();
 }
 
 function extractCafe24PaidAmount(order: any): number | null {
-  const raw = order?.actual_payment_amount ?? order?.paid_amount ?? order?.payed_amount ?? order?.amount;
+  const raw =
+    order?.actual_payment_amount?.payment_amount ??
+    order?.initial_order_amount?.payment_amount ??
+    order?.payment_amount ??
+    order?.actual_payment_amount ??
+    order?.paid_amount ??
+    order?.payed_amount ??
+    order?.amount;
   if (raw === null || raw === undefined || raw === "") return null;
   const parsed = Number(raw);
   return Number.isFinite(parsed) ? parsed : null;
@@ -112,7 +143,20 @@ function extractCafe24PaidAmount(order: any): number | null {
 
 function isCafe24Paid(order: any): boolean {
   const paymentStatus = extractCafe24PaymentStatus(order);
-  return paymentStatus === "t" || paymentStatus === "paid" || paymentStatus === "payment_confirmed";
+  if (paymentStatus === "t" || paymentStatus === "paid" || paymentStatus === "payment_confirmed") {
+    return true;
+  }
+
+  const paidFlag = String(order?.paid || "").toLowerCase();
+  return paidFlag === "t" || paidFlag === "true" || paidFlag === "paid";
+}
+
+function isCafe24OrderCreditable(order: any): boolean {
+  const orderStatus = extractCafe24OrderStatus(order);
+  if (!orderStatus) return true;
+
+  const blockedKeywords = ["cancel", "refund", "return", "exchange", "failed"];
+  return !blockedKeywords.some((keyword) => orderStatus.includes(keyword));
 }
 
 async function ensureChargeUserData(kakaoId: string) {
@@ -183,17 +227,146 @@ async function appendChargeLedgerAndBalance(params: {
   return { alreadyCredited: false, newBalance: userData.points };
 }
 
+function toIsoStringOrNull(value: unknown): string | undefined {
+  if (typeof value !== "string" || !value) return undefined;
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return undefined;
+  return parsed.toISOString();
+}
+
+async function getCafe24TokenStore(): Promise<Cafe24TokenStore | null> {
+  const stored = await kv.get(CAFE24_TOKEN_STORE_KEY);
+  if (!stored) return null;
+  return typeof stored === "string" ? JSON.parse(stored) : stored;
+}
+
+async function saveCafe24TokenStore(tokenStore: Cafe24TokenStore): Promise<void> {
+  await kv.set(CAFE24_TOKEN_STORE_KEY, tokenStore);
+}
+
+function isTokenExpired(expiresAt?: string, safetyWindowMs = 60_000): boolean {
+  if (!expiresAt) return true;
+  const expiry = new Date(expiresAt).getTime();
+  if (Number.isNaN(expiry)) return true;
+  return Date.now() + safetyWindowMs >= expiry;
+}
+
+async function requestCafe24Token(params: {
+  grantType: "authorization_code" | "refresh_token";
+  code?: string;
+  refreshToken?: string;
+}): Promise<Cafe24TokenStore> {
+  if (!CAFE24_MALL_ID || !CAFE24_CLIENT_ID || !CAFE24_CLIENT_SECRET || !CAFE24_REDIRECT_URI) {
+    throw new Error("Cafe24 OAuth credentials are not fully configured");
+  }
+
+  const body = new URLSearchParams();
+  body.set("grant_type", params.grantType);
+  if (params.grantType === "authorization_code") {
+    if (!params.code) {
+      throw new Error("Missing Cafe24 authorization code");
+    }
+    body.set("code", params.code);
+    body.set("redirect_uri", CAFE24_REDIRECT_URI);
+  } else {
+    if (!params.refreshToken) {
+      throw new Error("Missing Cafe24 refresh token");
+    }
+    body.set("refresh_token", params.refreshToken);
+  }
+
+  const response = await fetch(`https://${CAFE24_MALL_ID}.cafe24api.com/api/v2/oauth/token`, {
+    method: "POST",
+    headers: {
+      Authorization: `Basic ${btoa(`${CAFE24_CLIENT_ID}:${CAFE24_CLIENT_SECRET}`)}`,
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    body: body.toString(),
+  });
+
+  const responseText = await response.text();
+  let result: any = null;
+  try {
+    result = responseText ? JSON.parse(responseText) : null;
+  } catch {
+    result = null;
+  }
+
+  if (!response.ok || !result?.access_token) {
+    const errorMessage =
+      result?.error_description || result?.error || responseText || "Cafe24 token request failed";
+    throw new Error(errorMessage);
+  }
+
+  const tokenStore: Cafe24TokenStore = {
+    accessToken: result.access_token,
+    refreshToken: result.refresh_token,
+    expiresAt: toIsoStringOrNull(result.expires_at),
+    refreshTokenExpiresAt: toIsoStringOrNull(result.refresh_token_expires_at),
+    mallId: result.mall_id || CAFE24_MALL_ID,
+    shopNo: String(result.shop_no || CAFE24_SHOP_NO || "1"),
+    userId: result.user_id,
+    scopes: Array.isArray(result.scopes) ? result.scopes : undefined,
+    issuedAt: toIsoStringOrNull(result.issued_at),
+    updatedAt: new Date().toISOString(),
+  };
+
+  await saveCafe24TokenStore(tokenStore);
+  return tokenStore;
+}
+
+async function getValidCafe24TokenStore(): Promise<Cafe24TokenStore> {
+  const stored = await getCafe24TokenStore();
+
+  if (stored?.accessToken && !isTokenExpired(stored.expiresAt)) {
+    return stored;
+  }
+
+  if (stored?.refreshToken && !isTokenExpired(stored.refreshTokenExpiresAt, 0)) {
+    return requestCafe24Token({
+      grantType: "refresh_token",
+      refreshToken: stored.refreshToken,
+    });
+  }
+
+  if (CAFE24_ADMIN_ACCESS_TOKEN && CAFE24_MALL_ID) {
+    const fallbackTokenStore: Cafe24TokenStore = {
+      accessToken: CAFE24_ADMIN_ACCESS_TOKEN,
+      refreshToken: CAFE24_REFRESH_TOKEN || undefined,
+      expiresAt: CAFE24_ACCESS_TOKEN_EXPIRES_AT || undefined,
+      refreshTokenExpiresAt: CAFE24_REFRESH_TOKEN_EXPIRES_AT || undefined,
+      mallId: CAFE24_MALL_ID,
+      shopNo: CAFE24_SHOP_NO,
+      updatedAt: new Date().toISOString(),
+    };
+
+    if (!isTokenExpired(fallbackTokenStore.expiresAt)) {
+      return fallbackTokenStore;
+    }
+
+    if (fallbackTokenStore.refreshToken && !isTokenExpired(fallbackTokenStore.refreshTokenExpiresAt, 0)) {
+      return requestCafe24Token({
+        grantType: "refresh_token",
+        refreshToken: fallbackTokenStore.refreshToken,
+      });
+    }
+  }
+
+  throw new Error("Cafe24 access token is not configured");
+}
+
 async function fetchCafe24Order(orderId: string) {
-  if (!CAFE24_MALL_ID || !CAFE24_ADMIN_ACCESS_TOKEN) {
+  const tokenStore = await getValidCafe24TokenStore();
+  if (!tokenStore.mallId || !tokenStore.accessToken) {
     throw new Error("Cafe24 Admin API credentials are not configured");
   }
 
-  const url = new URL(`https://${CAFE24_MALL_ID}.cafe24api.com/api/v2/admin/orders/${encodeURIComponent(orderId)}`);
-  url.searchParams.set("shop_no", CAFE24_SHOP_NO);
+  const url = new URL(`https://${tokenStore.mallId}.cafe24api.com/api/v2/admin/orders/${encodeURIComponent(orderId)}`);
+  url.searchParams.set("shop_no", tokenStore.shopNo || CAFE24_SHOP_NO);
 
   const response = await fetch(url.toString(), {
     headers: {
-      Authorization: `Bearer ${CAFE24_ADMIN_ACCESS_TOKEN}`,
+      Authorization: `Bearer ${tokenStore.accessToken}`,
       "Content-Type": "application/json",
     },
   });
@@ -204,6 +377,241 @@ async function fetchCafe24Order(orderId: string) {
   }
 
   return result.order || result.orders?.[0] || result;
+}
+
+async function findRecoverableChargeCandidate(params: {
+  amountKrw?: number | null;
+  maxAgeMinutes?: number;
+}) {
+  const maxAgeMinutes = params.maxAgeMinutes ?? 30;
+  const createdAfter = new Date(Date.now() - maxAgeMinutes * 60 * 1000).toISOString();
+
+  let query = supabase
+    .from("charge_requests")
+    .select("*")
+    .is("cafe24_order_id", null)
+    .gte("created_at", createdAfter)
+    .in("status", ["pending", "checkout_started", "payment_detected", "paid"])
+    .order("created_at", { ascending: false })
+    .limit(5);
+
+  if (typeof params.amountKrw === "number") {
+    query = query.eq("amount_krw", params.amountKrw);
+  }
+
+  const result = await query;
+  if (result.error) {
+    throw new Error(`Failed to load recoverable charges: ${result.error.message}`);
+  }
+
+  return result.data || [];
+}
+
+async function linkCafe24OrderToCharge(internalOrderId: string, cafe24OrderId: string) {
+  const chargeUpdate = await supabase
+    .from("charge_requests")
+    .update({
+      cafe24_order_id: cafe24OrderId,
+    })
+    .eq("internal_order_id", internalOrderId);
+
+  if (chargeUpdate.error) {
+    throw new Error(`Failed to link charge request: ${chargeUpdate.error.message}`);
+  }
+
+  const mappingUpdate = await supabase
+    .from("order_mappings")
+    .update({
+      cafe24_order_id: cafe24OrderId,
+      mapping_status: "linked",
+    })
+    .eq("internal_order_id", internalOrderId);
+
+  if (mappingUpdate.error) {
+    throw new Error(`Failed to link order mapping: ${mappingUpdate.error.message}`);
+  }
+}
+
+async function verifyCafe24Charge(params: {
+  internalOrderId?: string | null;
+  cafe24OrderId?: string | null;
+}) {
+  const { internalOrderId, cafe24OrderId: bodyCafe24OrderId } = params;
+
+  if (!internalOrderId && !bodyCafe24OrderId) {
+    return { body: { error: "Missing internalOrderId or cafe24OrderId" }, status: 400 };
+  }
+
+  let chargeQuery = supabase
+    .from("charge_requests")
+    .select("*")
+    .limit(1);
+
+  if (internalOrderId) {
+    chargeQuery = chargeQuery.eq("internal_order_id", internalOrderId);
+  } else {
+    chargeQuery = chargeQuery.eq("cafe24_order_id", bodyCafe24OrderId);
+  }
+
+  const chargeResult = await chargeQuery.maybeSingle();
+  if (chargeResult.error) {
+    return { body: { error: "Failed to load charge request", details: chargeResult.error.message }, status: 500 };
+  }
+
+  const charge = chargeResult.data;
+  if (!charge) {
+    return { body: { error: "Charge request not found" }, status: 404 };
+  }
+
+  if (charge.status === "credited") {
+    return {
+      body: {
+        success: true,
+        internalOrderId: charge.internal_order_id,
+        cafe24OrderId: charge.cafe24_order_id,
+        status: "credited",
+        alreadyCredited: true,
+      },
+      status: 200,
+    };
+  }
+
+  const cafe24OrderId = bodyCafe24OrderId || charge.cafe24_order_id;
+  if (!cafe24OrderId) {
+    return {
+      body: {
+        success: false,
+        status: charge.status,
+        verificationStatus: "awaiting_order_mapping",
+      },
+      status: 202,
+    };
+  }
+
+  const cafe24Order = await fetchCafe24Order(cafe24OrderId);
+  const paidAmount = extractCafe24PaidAmount(cafe24Order);
+  const paid = isCafe24Paid(cafe24Order);
+  const creditableOrder = isCafe24OrderCreditable(cafe24Order);
+
+  await supabase.from("payment_events").insert({
+    source: "cafe24_polling",
+    event_type: "verify",
+    internal_order_id: charge.internal_order_id,
+    cafe24_order_id: cafe24OrderId,
+    payload: cafe24Order,
+    process_status: paid ? "processed" : "received",
+  });
+
+  if (!paid) {
+    await supabase
+      .from("charge_requests")
+      .update({
+        cafe24_order_id: cafe24OrderId,
+        cafe24_order_status: String(cafe24Order?.order_status || ""),
+        cafe24_payment_status: String(cafe24Order?.payment_status || ""),
+        verification_attempts: (charge.verification_attempts || 0) + 1,
+        last_verified_at: new Date().toISOString(),
+        status: "payment_detected",
+      })
+      .eq("internal_order_id", charge.internal_order_id);
+
+    return {
+      body: {
+        success: false,
+        status: "payment_detected",
+        verificationStatus: "not_paid_yet",
+      },
+      status: 202,
+    };
+  }
+
+  if (!creditableOrder) {
+    const orderStatus = extractCafe24OrderStatus(cafe24Order);
+    await supabase
+      .from("charge_requests")
+      .update({
+        cafe24_order_id: cafe24OrderId,
+        cafe24_order_status: String(cafe24Order?.order_status || ""),
+        cafe24_payment_status: String(cafe24Order?.payment_status || ""),
+        verification_attempts: (charge.verification_attempts || 0) + 1,
+        last_verified_at: new Date().toISOString(),
+        status: "failed",
+        failed_reason: `Non-creditable Cafe24 order status: ${orderStatus || "unknown"}`,
+      })
+      .eq("internal_order_id", charge.internal_order_id);
+
+    return { body: { error: "Order status is not creditable" }, status: 409 };
+  }
+
+  if (paidAmount !== null && Number(paidAmount) !== Number(charge.amount_krw)) {
+    await supabase
+      .from("charge_requests")
+      .update({
+        cafe24_order_id: cafe24OrderId,
+        cafe24_order_status: String(cafe24Order?.order_status || ""),
+        cafe24_payment_status: String(cafe24Order?.payment_status || ""),
+        verification_attempts: (charge.verification_attempts || 0) + 1,
+        last_verified_at: new Date().toISOString(),
+        status: "failed",
+        failed_reason: `Amount mismatch: expected=${charge.amount_krw}, received=${paidAmount}`,
+      })
+      .eq("internal_order_id", charge.internal_order_id);
+
+    return { body: { error: "Amount mismatch" }, status: 409 };
+  }
+
+  await supabase
+    .from("charge_requests")
+    .update({
+      cafe24_order_id: cafe24OrderId,
+      cafe24_order_status: String(cafe24Order?.order_status || ""),
+      cafe24_payment_status: String(cafe24Order?.payment_status || ""),
+      verification_attempts: (charge.verification_attempts || 0) + 1,
+      last_verified_at: new Date().toISOString(),
+      payment_confirmed_at: new Date().toISOString(),
+      status: "paid",
+    })
+    .eq("internal_order_id", charge.internal_order_id);
+
+  await supabase
+    .from("order_mappings")
+    .update({
+      cafe24_order_id: cafe24OrderId,
+      mapping_status: "linked",
+    })
+    .eq("internal_order_id", charge.internal_order_id);
+
+  let ledgerResult: { alreadyCredited: boolean; newBalance?: number };
+  try {
+    ledgerResult = await appendChargeLedgerAndBalance({
+      internalOrderId: charge.internal_order_id,
+      cafe24OrderId,
+      kakaoId: charge.user_kakao_id,
+      points: charge.points,
+      description: `${charge.product_name} credited (${charge.internal_order_id})`,
+    });
+  } catch (error) {
+    throw error;
+  }
+
+  await supabase
+    .from("charge_requests")
+    .update({
+      status: "credited",
+      credited_at: new Date().toISOString(),
+    })
+    .eq("internal_order_id", charge.internal_order_id);
+
+  return {
+    body: {
+      success: true,
+      internalOrderId: charge.internal_order_id,
+      cafe24OrderId,
+      status: "credited",
+      alreadyCredited: ledgerResult.alreadyCredited,
+    },
+    status: 200,
+  };
 }
 
 // Kakao REST API Key
@@ -432,6 +840,250 @@ app.post("/make-server-53dba95c/admin/login", async (c) => {
     });
   } catch (error) {
     return c.json({ error: String(error) }, 500);
+  }
+});
+
+app.get("/make-server-53dba95c/admin/cafe24/oauth/status", async (c) => {
+  const adminSecret = getAdminSecretFromHeaders(c);
+  if (!(await validateAdminAuth(adminSecret))) {
+    return c.json({ error: "Unauthorized" }, 401);
+  }
+
+  const tokenStore = await getCafe24TokenStore();
+  return c.json({
+    success: true,
+    configured: Boolean(CAFE24_MALL_ID && CAFE24_CLIENT_ID && CAFE24_CLIENT_SECRET && CAFE24_REDIRECT_URI),
+    mallId: CAFE24_MALL_ID || tokenStore?.mallId || null,
+    redirectUri: CAFE24_REDIRECT_URI || null,
+    hasStoredToken: Boolean(tokenStore?.accessToken),
+    hasRefreshToken: Boolean(tokenStore?.refreshToken),
+    expiresAt: tokenStore?.expiresAt || null,
+    refreshTokenExpiresAt: tokenStore?.refreshTokenExpiresAt || null,
+    scopes: tokenStore?.scopes || [],
+  });
+});
+
+app.post("/make-server-53dba95c/admin/cafe24/oauth/exchange-code", async (c) => {
+  const adminSecret = getAdminSecretFromHeaders(c);
+  if (!(await validateAdminAuth(adminSecret))) {
+    return c.json({ error: "Unauthorized" }, 401);
+  }
+
+  try {
+    const { code } = await c.req.json();
+    if (!code) {
+      return c.json({ error: "Missing authorization code" }, 400);
+    }
+
+    const tokenStore = await requestCafe24Token({
+      grantType: "authorization_code",
+      code,
+    });
+
+    return c.json({
+      success: true,
+      mallId: tokenStore.mallId,
+      shopNo: tokenStore.shopNo,
+      expiresAt: tokenStore.expiresAt || null,
+      refreshTokenExpiresAt: tokenStore.refreshTokenExpiresAt || null,
+      scopes: tokenStore.scopes || [],
+    });
+  } catch (error) {
+    return c.json({ error: error instanceof Error ? error.message : String(error) }, 500);
+  }
+});
+
+app.post("/make-server-53dba95c/admin/cafe24/oauth/refresh", async (c) => {
+  const adminSecret = getAdminSecretFromHeaders(c);
+  if (!(await validateAdminAuth(adminSecret))) {
+    return c.json({ error: "Unauthorized" }, 401);
+  }
+
+  try {
+    const stored = await getCafe24TokenStore();
+    if (!stored?.refreshToken) {
+      return c.json({ error: "Cafe24 refresh token is not configured" }, 400);
+    }
+
+    const tokenStore = await requestCafe24Token({
+      grantType: "refresh_token",
+      refreshToken: stored.refreshToken,
+    });
+
+    return c.json({
+      success: true,
+      mallId: tokenStore.mallId,
+      shopNo: tokenStore.shopNo,
+      expiresAt: tokenStore.expiresAt || null,
+      refreshTokenExpiresAt: tokenStore.refreshTokenExpiresAt || null,
+      scopes: tokenStore.scopes || [],
+    });
+  } catch (error) {
+    return c.json({ error: error instanceof Error ? error.message : String(error) }, 500);
+  }
+});
+
+app.get("/make-server-53dba95c/admin/cafe24/orders/:orderId/diagnose", async (c) => {
+  const adminSecret = getAdminSecretFromHeaders(c);
+  if (!(await validateAdminAuth(adminSecret))) {
+    return c.json({ error: "Unauthorized" }, 401);
+  }
+
+  try {
+    const orderId = c.req.param("orderId");
+    const cafe24Order = await fetchCafe24Order(orderId);
+
+    const chargeResult = await supabase
+      .from("charge_requests")
+      .select("*")
+      .eq("cafe24_order_id", orderId)
+      .maybeSingle();
+
+    const mappingResult = await supabase
+      .from("order_mappings")
+      .select("*")
+      .eq("cafe24_order_id", orderId)
+      .maybeSingle();
+
+    return c.json({
+      success: true,
+      orderId,
+      paymentStatus: extractCafe24PaymentStatus(cafe24Order),
+      orderStatus: extractCafe24OrderStatus(cafe24Order),
+      paidAmount: extractCafe24PaidAmount(cafe24Order),
+      creditable: isCafe24OrderCreditable(cafe24Order),
+      paid: isCafe24Paid(cafe24Order),
+      cafe24Order,
+      chargeRequest: chargeResult.data || null,
+      chargeRequestError: chargeResult.error?.message || null,
+      orderMapping: mappingResult.data || null,
+      orderMappingError: mappingResult.error?.message || null,
+    });
+  } catch (error) {
+    return c.json({ error: error instanceof Error ? error.message : String(error) }, 500);
+  }
+});
+
+app.get("/make-server-53dba95c/diag/cafe24/orders/:orderId", async (c) => {
+  try {
+    const orderId = c.req.param("orderId");
+    const cafe24Order = await fetchCafe24Order(orderId);
+
+    const chargeResult = await supabase
+      .from("charge_requests")
+      .select("internal_order_id,status,amount_krw,points,cafe24_order_id,cafe24_order_status,cafe24_payment_status,failed_reason,verification_attempts,credited_at,payment_confirmed_at")
+      .eq("cafe24_order_id", orderId)
+      .maybeSingle();
+
+    const mappingResult = await supabase
+      .from("order_mappings")
+      .select("internal_order_id,cafe24_order_id,mapping_status")
+      .eq("cafe24_order_id", orderId)
+      .maybeSingle();
+
+    return c.json({
+      success: true,
+      orderId,
+      paymentStatus: extractCafe24PaymentStatus(cafe24Order),
+      orderStatus: extractCafe24OrderStatus(cafe24Order),
+      paidAmount: extractCafe24PaidAmount(cafe24Order),
+      creditable: isCafe24OrderCreditable(cafe24Order),
+      paid: isCafe24Paid(cafe24Order),
+      chargeRequest: chargeResult.data || null,
+      chargeRequestError: chargeResult.error?.message || null,
+      orderMapping: mappingResult.data || null,
+      orderMappingError: mappingResult.error?.message || null,
+    });
+  } catch (error) {
+    return c.json({ error: error instanceof Error ? error.message : String(error) }, 500);
+  }
+});
+
+app.post("/make-server-53dba95c/diag/cafe24/orders/:orderId/recover", async (c) => {
+  try {
+    const orderId = c.req.param("orderId");
+    const body = await c.req.json().catch(() => ({}));
+    const amountKrw = typeof body?.amountKrw === "number" ? body.amountKrw : 100;
+    const maxAgeMinutes = typeof body?.maxAgeMinutes === "number" ? body.maxAgeMinutes : 30;
+
+    const candidates = await findRecoverableChargeCandidate({
+      amountKrw,
+      maxAgeMinutes,
+    });
+
+    if (candidates.length !== 1) {
+      return c.json({
+        success: false,
+        recoverable: false,
+        reason: candidates.length === 0 ? "No recoverable charge candidate found" : "Multiple recoverable charge candidates found",
+        candidateCount: candidates.length,
+        candidates: candidates.map((candidate: any) => ({
+          internalOrderId: candidate.internal_order_id,
+          status: candidate.status,
+          amountKrw: candidate.amount_krw,
+          createdAt: candidate.created_at || null,
+        })),
+      }, 409);
+    }
+
+    const candidate = candidates[0];
+    await linkCafe24OrderToCharge(candidate.internal_order_id, orderId);
+    const result = await verifyCafe24Charge({
+      internalOrderId: candidate.internal_order_id,
+      cafe24OrderId: orderId,
+    });
+
+    return c.json({
+      success: true,
+      recoveredInternalOrderId: candidate.internal_order_id,
+      verification: result.body,
+    }, result.status as any);
+  } catch (error) {
+    return c.json({ error: error instanceof Error ? error.message : String(error) }, 500);
+  }
+});
+
+app.post("/make-server-53dba95c/diag/cafe24/orders/:orderId/recover/:internalOrderId", async (c) => {
+  try {
+    const orderId = c.req.param("orderId");
+    const internalOrderId = c.req.param("internalOrderId");
+
+    await linkCafe24OrderToCharge(internalOrderId, orderId);
+    const result = await verifyCafe24Charge({
+      internalOrderId,
+      cafe24OrderId: orderId,
+    });
+
+    return c.json({
+      success: true,
+      recoveredInternalOrderId: internalOrderId,
+      verification: result.body,
+    }, result.status as any);
+  } catch (error) {
+    return c.json({ error: error instanceof Error ? error.message : String(error) }, 500);
+  }
+});
+
+app.post("/make-server-53dba95c/diag/cafe24/recover-order", async (c) => {
+  try {
+    const { orderId, internalOrderId } = await c.req.json();
+    if (!orderId || !internalOrderId) {
+      return c.json({ error: "Missing orderId or internalOrderId" }, 400);
+    }
+
+    await linkCafe24OrderToCharge(String(internalOrderId), String(orderId));
+    const result = await verifyCafe24Charge({
+      internalOrderId: String(internalOrderId),
+      cafe24OrderId: String(orderId),
+    });
+
+    return c.json({
+      success: true,
+      recoveredInternalOrderId: String(internalOrderId),
+      verification: result.body,
+    }, result.status as any);
+  } catch (error) {
+    return c.json({ error: error instanceof Error ? error.message : String(error) }, 500);
   }
 });
 
@@ -878,136 +1530,9 @@ app.post("/make-server-53dba95c/payments/cafe24/callback", async (c) => {
 
 app.post("/make-server-53dba95c/payments/cafe24/verify", async (c) => {
   try {
-    const { internalOrderId, cafe24OrderId: bodyCafe24OrderId } = await c.req.json();
-
-    if (!internalOrderId && !bodyCafe24OrderId) {
-      return c.json({ error: "Missing internalOrderId or cafe24OrderId" }, 400);
-    }
-
-    let chargeQuery = supabase
-      .from("charge_requests")
-      .select("*")
-      .limit(1);
-
-    if (internalOrderId) {
-      chargeQuery = chargeQuery.eq("internal_order_id", internalOrderId);
-    } else {
-      chargeQuery = chargeQuery.eq("cafe24_order_id", bodyCafe24OrderId);
-    }
-
-    const chargeResult = await chargeQuery.maybeSingle();
-    if (chargeResult.error) {
-      return c.json({ error: "Failed to load charge request", details: chargeResult.error.message }, 500);
-    }
-
-    const charge = chargeResult.data;
-    if (!charge) {
-      return c.json({ error: "Charge request not found" }, 404);
-    }
-
-    const cafe24OrderId = bodyCafe24OrderId || charge.cafe24_order_id;
-    if (!cafe24OrderId) {
-      return c.json({
-        success: false,
-        status: charge.status,
-        verificationStatus: "awaiting_order_mapping",
-      }, 202);
-    }
-
-    const cafe24Order = await fetchCafe24Order(cafe24OrderId);
-    const paidAmount = extractCafe24PaidAmount(cafe24Order);
-    const paid = isCafe24Paid(cafe24Order);
-
-    await supabase.from("payment_events").insert({
-      source: "cafe24_polling",
-      event_type: "verify",
-      internal_order_id: charge.internal_order_id,
-      cafe24_order_id: cafe24OrderId,
-      payload: cafe24Order,
-      process_status: paid ? "processed" : "received",
-    });
-
-    if (!paid) {
-      await supabase
-        .from("charge_requests")
-        .update({
-          cafe24_order_id: cafe24OrderId,
-          cafe24_order_status: String(cafe24Order?.order_status || ""),
-          cafe24_payment_status: String(cafe24Order?.payment_status || ""),
-          verification_attempts: (charge.verification_attempts || 0) + 1,
-          last_verified_at: new Date().toISOString(),
-          status: "payment_detected",
-        })
-        .eq("internal_order_id", charge.internal_order_id);
-
-      return c.json({
-        success: false,
-        status: "payment_detected",
-        verificationStatus: "not_paid_yet",
-      }, 202);
-    }
-
-    if (paidAmount !== null && Number(paidAmount) !== Number(charge.amount_krw)) {
-      await supabase
-        .from("charge_requests")
-        .update({
-          cafe24_order_id: cafe24OrderId,
-          cafe24_order_status: String(cafe24Order?.order_status || ""),
-          cafe24_payment_status: String(cafe24Order?.payment_status || ""),
-          verification_attempts: (charge.verification_attempts || 0) + 1,
-          last_verified_at: new Date().toISOString(),
-          status: "failed",
-          failed_reason: `Amount mismatch: expected=${charge.amount_krw}, received=${paidAmount}`,
-        })
-        .eq("internal_order_id", charge.internal_order_id);
-
-      return c.json({ error: "Amount mismatch" }, 409);
-    }
-
-    await supabase
-      .from("charge_requests")
-      .update({
-        cafe24_order_id: cafe24OrderId,
-        cafe24_order_status: String(cafe24Order?.order_status || ""),
-        cafe24_payment_status: String(cafe24Order?.payment_status || ""),
-        verification_attempts: (charge.verification_attempts || 0) + 1,
-        last_verified_at: new Date().toISOString(),
-        payment_confirmed_at: new Date().toISOString(),
-        status: "paid",
-      })
-      .eq("internal_order_id", charge.internal_order_id);
-
-    await supabase
-      .from("order_mappings")
-      .update({
-        cafe24_order_id: cafe24OrderId,
-        mapping_status: "linked",
-      })
-      .eq("internal_order_id", charge.internal_order_id);
-
-    const ledgerResult = await appendChargeLedgerAndBalance({
-      internalOrderId: charge.internal_order_id,
-      cafe24OrderId,
-      kakaoId: charge.user_kakao_id,
-      points: charge.points,
-      description: `${charge.product_name} credited (${charge.internal_order_id})`,
-    });
-
-    await supabase
-      .from("charge_requests")
-      .update({
-        status: "credited",
-        credited_at: new Date().toISOString(),
-      })
-      .eq("internal_order_id", charge.internal_order_id);
-
-    return c.json({
-      success: true,
-      internalOrderId: charge.internal_order_id,
-      cafe24OrderId,
-      status: "credited",
-      alreadyCredited: ledgerResult.alreadyCredited,
-    });
+    const { internalOrderId, cafe24OrderId } = await c.req.json();
+    const result = await verifyCafe24Charge({ internalOrderId, cafe24OrderId });
+    return c.json(result.body, result.status as any);
   } catch (error) {
     console.error("Cafe24 verify error:", error);
     return c.json({ error: "Failed to verify Cafe24 payment", details: String(error) }, 500);
