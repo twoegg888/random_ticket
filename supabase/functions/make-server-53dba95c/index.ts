@@ -964,42 +964,12 @@ app.get("/make-server-53dba95c/admin/cafe24/orders/:orderId/diagnose", async (c)
   }
 });
 
-app.get("/make-server-53dba95c/diag/cafe24/orders/:orderId", async (c) => {
-  try {
-    const orderId = c.req.param("orderId");
-    const cafe24Order = await fetchCafe24Order(orderId);
-
-    const chargeResult = await supabase
-      .from("charge_requests")
-      .select("internal_order_id,status,amount_krw,points,cafe24_order_id,cafe24_order_status,cafe24_payment_status,failed_reason,verification_attempts,credited_at,payment_confirmed_at")
-      .eq("cafe24_order_id", orderId)
-      .maybeSingle();
-
-    const mappingResult = await supabase
-      .from("order_mappings")
-      .select("internal_order_id,cafe24_order_id,mapping_status")
-      .eq("cafe24_order_id", orderId)
-      .maybeSingle();
-
-    return c.json({
-      success: true,
-      orderId,
-      paymentStatus: extractCafe24PaymentStatus(cafe24Order),
-      orderStatus: extractCafe24OrderStatus(cafe24Order),
-      paidAmount: extractCafe24PaidAmount(cafe24Order),
-      creditable: isCafe24OrderCreditable(cafe24Order),
-      paid: isCafe24Paid(cafe24Order),
-      chargeRequest: chargeResult.data || null,
-      chargeRequestError: chargeResult.error?.message || null,
-      orderMapping: mappingResult.data || null,
-      orderMappingError: mappingResult.error?.message || null,
-    });
-  } catch (error) {
-    return c.json({ error: error instanceof Error ? error.message : String(error) }, 500);
+app.post("/make-server-53dba95c/admin/cafe24/orders/:orderId/recover", async (c) => {
+  const adminSecret = getAdminSecretFromHeaders(c);
+  if (!(await validateAdminAuth(adminSecret))) {
+    return c.json({ error: "Unauthorized" }, 401);
   }
-});
 
-app.post("/make-server-53dba95c/diag/cafe24/orders/:orderId/recover", async (c) => {
   try {
     const orderId = c.req.param("orderId");
     const body = await c.req.json().catch(() => ({}));
@@ -1043,7 +1013,12 @@ app.post("/make-server-53dba95c/diag/cafe24/orders/:orderId/recover", async (c) 
   }
 });
 
-app.post("/make-server-53dba95c/diag/cafe24/orders/:orderId/recover/:internalOrderId", async (c) => {
+app.post("/make-server-53dba95c/admin/cafe24/orders/:orderId/recover/:internalOrderId", async (c) => {
+  const adminSecret = getAdminSecretFromHeaders(c);
+  if (!(await validateAdminAuth(adminSecret))) {
+    return c.json({ error: "Unauthorized" }, 401);
+  }
+
   try {
     const orderId = c.req.param("orderId");
     const internalOrderId = c.req.param("internalOrderId");
@@ -1064,7 +1039,12 @@ app.post("/make-server-53dba95c/diag/cafe24/orders/:orderId/recover/:internalOrd
   }
 });
 
-app.post("/make-server-53dba95c/diag/cafe24/recover-order", async (c) => {
+app.post("/make-server-53dba95c/admin/cafe24/recover-order", async (c) => {
+  const adminSecret = getAdminSecretFromHeaders(c);
+  if (!(await validateAdminAuth(adminSecret))) {
+    return c.json({ error: "Unauthorized" }, 401);
+  }
+
   try {
     const { orderId, internalOrderId } = await c.req.json();
     if (!orderId || !internalOrderId) {
