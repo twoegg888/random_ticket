@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router";
 import { useApp } from "../context/AppContext";
 import { projectId, publicAnonKey } from "../../../utils/supabase/info";
@@ -130,7 +130,12 @@ function ChargeModal({
 
 export default function Points() {
   const [isChargeOpen, setIsChargeOpen] = useState(false);
-  const { userData, isLoggedIn } = useApp();
+  const { userData, isLoggedIn, refreshUserData } = useApp();
+
+  useEffect(() => {
+    if (!isLoggedIn) return;
+    void refreshUserData();
+  }, [isLoggedIn, refreshUserData]);
 
   return (
     <div className="mx-auto min-h-screen w-full max-w-[480px] bg-[#f7f7f8]">

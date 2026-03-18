@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router";
+import { useApp } from "../context/AppContext";
 import { projectId, publicAnonKey } from "../../../utils/supabase/info";
 
 type ChargeStatus =
@@ -18,6 +19,7 @@ export default function PaymentSuccess() {
   const [searchParams] = useSearchParams();
   const [status, setStatus] = useState<ChargeStatus | "loading">("loading");
   const [error, setError] = useState<string | null>(null);
+  const { refreshUserData } = useApp();
 
   const internalOrderId =
     searchParams.get("internalOrderId") ||
@@ -123,6 +125,7 @@ export default function PaymentSuccess() {
         setStatus(nextStatus);
 
         if (nextStatus === "credited") {
+          await refreshUserData();
           window.setTimeout(() => {
             navigate("/points", { replace: true });
           }, 1800);
@@ -141,6 +144,7 @@ export default function PaymentSuccess() {
 
             if (polledStatus === "credited") {
               window.clearInterval(pollTimer);
+              await refreshUserData();
               window.setTimeout(() => {
                 navigate("/points", { replace: true });
               }, 1800);
