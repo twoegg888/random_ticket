@@ -3,6 +3,8 @@ import { useNavigate, useSearchParams } from "react-router";
 import { useApp } from "../context/AppContext";
 import { projectId, publicAnonKey } from "../../../utils/supabase/info";
 
+const PENDING_CHARGE_STORAGE_KEY = "pending_cafe24_charge";
+
 type ChargeStatus =
   | "pending"
   | "checkout_started"
@@ -20,17 +22,27 @@ export default function PaymentSuccess() {
   const [status, setStatus] = useState<ChargeStatus | "loading">("loading");
   const [error, setError] = useState<string | null>(null);
   const { refreshUserData } = useApp();
+  const storedPendingCharge = (() => {
+    try {
+      const raw = localStorage.getItem(PENDING_CHARGE_STORAGE_KEY);
+      return raw ? JSON.parse(raw) : null;
+    } catch {
+      return null;
+    }
+  })();
 
   const internalOrderId =
     searchParams.get("internalOrderId") ||
     searchParams.get("internal_order_id") ||
-    searchParams.get("merchant_order_id");
+    searchParams.get("merchant_order_id") ||
+    storedPendingCharge?.internalOrderId;
 
   const cafe24OrderId =
     searchParams.get("cafe24OrderId") ||
     searchParams.get("cafe24_order_id") ||
     searchParams.get("orderId") ||
-    searchParams.get("order_id");
+    searchParams.get("order_id") ||
+    searchParams.get("order_no");
 
   useEffect(() => {
     if (!internalOrderId) {
@@ -125,6 +137,7 @@ export default function PaymentSuccess() {
         setStatus(nextStatus);
 
         if (nextStatus === "credited") {
+          localStorage.removeItem(PENDING_CHARGE_STORAGE_KEY);
           await refreshUserData();
           window.setTimeout(() => {
             navigate("/points", { replace: true });
@@ -144,6 +157,7 @@ export default function PaymentSuccess() {
 
             if (polledStatus === "credited") {
               window.clearInterval(pollTimer);
+              localStorage.removeItem(PENDING_CHARGE_STORAGE_KEY);
               await refreshUserData();
               window.setTimeout(() => {
                 navigate("/points", { replace: true });

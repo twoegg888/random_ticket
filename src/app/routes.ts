@@ -35,6 +35,10 @@ export const router = createBrowserRouter([
     Component: PaymentSuccess,
   },
   {
+    path: "/cafe24",
+    Component: PaymentSuccess,
+  },
+  {
     path: "/payment/fail",
     Component: PaymentFail,
   },

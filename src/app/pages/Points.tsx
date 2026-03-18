@@ -4,6 +4,8 @@ import { useApp } from "../context/AppContext";
 import { projectId, publicAnonKey } from "../../../utils/supabase/info";
 import { CHARGE_PRODUCTS } from "../constants/chargeProducts";
 
+const PENDING_CHARGE_STORAGE_KEY = "pending_cafe24_charge";
+
 function ChargeModal({
   isOpen,
   onClose,
@@ -45,6 +47,16 @@ function ChargeModal({
       if (!response.ok || !result.success || !result.checkoutUrl) {
         throw new Error(result.error || "Failed to create Cafe24 checkout URL.");
       }
+
+      localStorage.setItem(
+        PENDING_CHARGE_STORAGE_KEY,
+        JSON.stringify({
+          internalOrderId: result.internalOrderId,
+          amount: selectedProduct.amount,
+          productCode: selectedProduct.productCode,
+          createdAt: new Date().toISOString(),
+        }),
+      );
 
       window.location.href = result.checkoutUrl;
     } catch (error) {
