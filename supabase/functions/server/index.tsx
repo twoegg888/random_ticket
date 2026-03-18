@@ -87,6 +87,14 @@ function getAppOrigin(c: any): string {
   return "http://localhost:5173";
 }
 
+function getAllowedOrigins(): string[] {
+  const raw = Deno.env.get("ALLOWED_ORIGINS") || "";
+  return raw
+    .split(",")
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+}
+
 function normalizeCafe24OrderId(payload: any): string | null {
   return payload?.cafe24OrderId || payload?.cafe24_order_id || payload?.orderId || payload?.order_id || null;
 }
@@ -203,72 +211,104 @@ const KAKAO_REST_API_KEY = "f1f1ee7feb6098a7bc74cd41e7d787cc";
 // Client Secret - 카카오 개발자 콘솔에서 '사용 안 함'으로 설정된 경우 주석 처리
 // const KAKAO_CLIENT_SECRET = "VsXJ7SeZlC9mxx3ifLa0fH9GsonqQMEb";
 
-// 🔐 관리자 시크릿 (비밀번호 기반 인증)
-// ⚠️ 하드코딩 - 환경변수 완전 무시 (2026-03-05 19:15 버전)
-const ADMIN_SECRET = "dleogus23@";
-const SERVER_VERSION = "v2026-03-05-1915-HARDCODED";
+// Admin authentication is configured only through environment variables in production.
+const ADMIN_SECRET = Deno.env.get("ADMIN_SECRET") || "";
+const ADMIN_SESSION_TTL_MS = 2 * 60 * 60 * 1000;
+const SERVER_VERSION = "v2026-03-18-admin-session";
 console.log("🔑 [SERVER START] Version:", SERVER_VERSION);
-console.log("🔑 [SERVER START] ADMIN_SECRET hardcoded to: dleogus23@");
-console.log("🔑 [SERVER START] ADMIN_SECRET length:", ADMIN_SECRET.length);
+console.log("🔑 [SERVER START] ADMIN_SECRET configured:", Boolean(ADMIN_SECRET));
+
+function encodeBase64Url(value: string): string {
+  return btoa(value).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
+}
+
+function decodeBase64Url(value: string): string {
+  const normalized = value.replace(/-/g, "+").replace(/_/g, "/");
+  const padding = "=".repeat((4 - (normalized.length % 4)) % 4);
+  return atob(normalized + padding);
+}
+
+async function signAdminPayload(payload: string): Promise<string> {
+  const key = await crypto.subtle.importKey(
+    "raw",
+    new TextEncoder().encode(ADMIN_SECRET),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"],
+  );
+
+  const signature = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(payload));
+  const bytes = Array.from(new Uint8Array(signature));
+  const binary = String.fromCharCode(...bytes);
+  return encodeBase64Url(binary);
+}
+
+async function createAdminSessionToken(): Promise<string> {
+  const payload = JSON.stringify({
+    type: "admin_session",
+    issuedAt: Date.now(),
+    expiresAt: Date.now() + ADMIN_SESSION_TTL_MS,
+  });
+  const encodedPayload = encodeBase64Url(payload);
+  const signature = await signAdminPayload(encodedPayload);
+  return `${encodedPayload}.${signature}`;
+}
+
+async function verifyAdminSessionToken(token: string): Promise<boolean> {
+  const [encodedPayload, providedSignature] = token.split(".");
+  if (!encodedPayload || !providedSignature || !ADMIN_SECRET) {
+    return false;
+  }
+
+  const expectedSignature = await signAdminPayload(encodedPayload);
+  if (expectedSignature !== providedSignature) {
+    return false;
+  }
+
+  try {
+    const payload = JSON.parse(decodeBase64Url(encodedPayload));
+    return (
+      payload?.type === "admin_session" &&
+      typeof payload?.expiresAt === "number" &&
+      payload.expiresAt > Date.now()
+    );
+  } catch {
+    return false;
+  }
+}
 
 // 🔐 헤더에서 관리자 시크릿 추출 (대소문자 구분 없이)
 function getAdminSecretFromHeaders(c: any): string | null {
-  console.log("🔍 [getAdminSecretFromHeaders] Extracting admin secret...");
-  
-  // 1. 표준 방식으로 시도
   let adminSecret = c.req.header("X-Admin-Secret");
-  console.log("  Method 1 (X-Admin-Secret):", adminSecret ? `${adminSecret.substring(0, 3)}***` : "NOT FOUND");
-  
-  // 2. 소문자로 시도
+
   if (!adminSecret) {
     adminSecret = c.req.header("x-admin-secret");
-    console.log("  Method 2 (x-admin-secret):", adminSecret ? `${adminSecret.substring(0, 3)}***` : "NOT FOUND");
   }
-  
-  // 3. raw headers에서 직접 찾기
+
   if (!adminSecret) {
     const headers = c.req.raw.headers;
-    console.log("  Method 3: Searching in raw headers...");
     for (const [key, value] of headers.entries()) {
       if (key.toLowerCase() === 'x-admin-secret') {
         adminSecret = value;
-        console.log(`  Found in raw headers: ${key} = ${value.substring(0, 3)}***`);
         break;
       }
     }
   }
-  
-  console.log("  Final result:", adminSecret ? `${adminSecret.substring(0, 3)}***` : "NULL");
+
   return adminSecret || null;
 }
 
 // 🔐 관리자 인증 미들웨어 (비밀번호 기반)
 async function validateAdminAuth(adminSecret: string | null): Promise<boolean> {
-  console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-  console.log("🔍 [validateAdminAuth] Starting validation");
-  console.log("  📥 Received secret:", adminSecret ? `${adminSecret.substring(0, 3)}***` : "NULL");
-  console.log("  🔑 Expected secret:", ADMIN_SECRET ? `${ADMIN_SECRET.substring(0, 3)}***` : "NOT SET");
-  
-  if (!adminSecret) {
-    console.error("  ❌ No admin secret provided!");
-    console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+  if (!ADMIN_SECRET || !adminSecret) {
     return false;
   }
-  
-  const match = adminSecret === ADMIN_SECRET;
-  console.log("  🔍 Match result:", match);
-  console.log("  📊 Received length:", adminSecret.length);
-  console.log("  📊 Expected length:", ADMIN_SECRET.length);
-  
-  if (match) {
-    console.log("  ✅ Admin verified successfully!");
-    console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+
+  if (adminSecret === ADMIN_SECRET) {
     return true;
   }
-  
-  console.error("  ❌ Invalid admin secret - mismatch!");
-  console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-  return false;
+
+  return verifyAdminSessionToken(adminSecret);
 }
 
 // 🔥 트랜잭션 로그 시스템 (무결성 보장)
@@ -337,10 +377,15 @@ async function validateUserAuth(authHeader: string | null, kakaoId: string): Pro
 app.use('*', logger(console.log));
 
 // Enable CORS for all routes and methods
+const allowedOrigins = getAllowedOrigins();
 app.use(
   "/*",
   cors({
-    origin: "*",
+    origin: (origin) => {
+      if (!origin) return allowedOrigins[0] || "*";
+      if (allowedOrigins.length === 0) return origin;
+      return allowedOrigins.includes(origin) ? origin : null;
+    },
     allowHeaders: [
       "Content-Type", 
       "Authorization", 
@@ -351,49 +396,39 @@ app.use(
     allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
     exposeHeaders: ["Content-Length", "Content-Type"],
     maxAge: 600,
-    credentials: false, // Must be false when origin is "*"
+    credentials: false,
   }),
 );
 
 // Health check endpoint
 app.get("/make-server-53dba95c/health", (c) => {
-  return c.json({ status: "ok" });
-});
-
-// 🔍 디버그: 관리자 인증 테스트
-app.get("/make-server-53dba95c/debug/admin-auth", (c) => {
-  const adminSecret = getAdminSecretFromHeaders(c);
-  const authHeader = c.req.header("Authorization");
-  const match = adminSecret === ADMIN_SECRET;
-  
-  console.log("🔍 [debug-auth] Match:", match);
-  
-  return c.json({ 
+  return c.json({
+    status: "ok",
     serverVersion: SERVER_VERSION,
-    authenticated: match,
-    expectedSecretHint: ADMIN_SECRET ? `${ADMIN_SECRET.substring(0, 3)}***` : "NOT SET",
+    adminConfigured: Boolean(ADMIN_SECRET),
   });
 });
 
-// 🔍 디버그: Supabase Auth 유저 목록 조회
-app.get("/make-server-53dba95c/debug/auth-users", async (c) => {
+app.post("/make-server-53dba95c/admin/login", async (c) => {
   try {
-    const { data, error } = await supabase.auth.admin.listUsers();
-    
-    if (error) {
-      return c.json({ error: error.message, details: error }, 500);
+    if (!ADMIN_SECRET) {
+      return c.json({ error: "Admin authentication is not configured." }, 503);
     }
-    
+
+    const { password } = await c.req.json();
+    if (!password) {
+      return c.json({ error: "Missing password" }, 400);
+    }
+
+    if (password !== ADMIN_SECRET) {
+      return c.json({ error: "Invalid admin credentials" }, 401);
+    }
+
+    const token = await createAdminSessionToken();
     return c.json({
       success: true,
-      count: data.users.length,
-      users: data.users.map(u => ({
-        id: u.id,
-        email: u.email,
-        created_at: u.created_at,
-        last_sign_in_at: u.last_sign_in_at,
-        metadata: u.user_metadata,
-      })),
+      token,
+      expiresInMs: ADMIN_SESSION_TTL_MS,
     });
   } catch (error) {
     return c.json({ error: String(error) }, 500);

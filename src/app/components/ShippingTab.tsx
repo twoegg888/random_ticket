@@ -3,34 +3,16 @@ import { projectId, publicAnonKey } from '../../../utils/supabase/info';
 
 // 🔐 관리자 API 호출 헤더 생성
 const getAuthHeaders = () => {
-  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-  console.log('🔍 [ShippingTab getAuthHeaders] Checking sessionStorage...');
-  console.log('   sessionStorage.length:', sessionStorage.length);
-  console.log('   sessionStorage keys:', Object.keys(sessionStorage));
-  
   const adminSecret = sessionStorage.getItem('admin_secret');
-  
-  console.log('   admin_secret from storage:', adminSecret ? `${adminSecret.substring(0, 3)}***` : 'NOT FOUND!');
-  
+
   if (!adminSecret) {
-    console.error('❌ [ShippingTab getAuthHeaders] No admin_secret in sessionStorage!');
-    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-    
-    // 🚨 에러를 던지지 않고 null 반환
     return null;
   }
 
-  const headers = {
+  return {
     'Authorization': `Bearer ${publicAnonKey}`,
     'X-Admin-Secret': adminSecret,
   };
-  
-  console.log('✅ [ShippingTab getAuthHeaders] Headers created successfully');
-  console.log('   Authorization:', `Bearer ${publicAnonKey.substring(0, 10)}...`);
-  console.log('   X-Admin-Secret:', `${adminSecret.substring(0, 3)}***`);
-  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-  
-  return headers;
 };
 
 export default function ShippingTab({ isAuthenticated }: { isAuthenticated?: boolean }) {
@@ -48,8 +30,7 @@ export default function ShippingTab({ isAuthenticated }: { isAuthenticated?: boo
     try {
       const headers = getAuthHeaders();
       if (!headers) {
-        console.error('❌ [fetchShippingRequests] No auth headers available!');
-        return; // 🚨 헤더가 없으면 종료
+        return;
       }
       
       const response = await fetch(
@@ -72,7 +53,7 @@ export default function ShippingTab({ isAuthenticated }: { isAuthenticated?: boo
       const headers = getAuthHeaders();
       if (!headers) {
         alert('❌ 인증 정보가 없습니다. 다시 로그인해주세요.');
-        return; // 🚨 헤더가 없으면 종료
+        return;
       }
       
       const response = await fetch(

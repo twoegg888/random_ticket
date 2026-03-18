@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
+import { projectId, publicAnonKey } from '../../../utils/supabase/info';
 
 export default function AdminLogin() {
   const [password, setPassword] = useState('');
@@ -8,33 +9,37 @@ export default function AdminLogin() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // 🔥 간단한 비밀번호 체크 (환경에 따라 변경 가능)
-    const ADMIN_PASSWORD = 'dleogus23@';
-    
-    if (password === ADMIN_PASSWORD) {
-      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-      console.log('✅ [AdminLogin] Password correct!');
-      console.log('   Saving to sessionStorage...');
-      
-      // 세션 스토리지에 관리자 인증 정보 저장
-      sessionStorage.setItem('admin_authenticated', 'true');
-      sessionStorage.setItem('admin_login_time', Date.now().toString());
-      // 🔐 백엔드 API 호출용 관리자 시크릿 저장
-      sessionStorage.setItem('admin_secret', ADMIN_PASSWORD);
-      
-      console.log('   ✅ admin_authenticated:', sessionStorage.getItem('admin_authenticated'));
-      console.log('   ✅ admin_login_time:', sessionStorage.getItem('admin_login_time'));
-      console.log('   ✅ admin_secret:', sessionStorage.getItem('admin_secret') ? 'SAVED' : 'NOT SAVED!');
-      console.log('   sessionStorage keys:', Object.keys(sessionStorage));
-      console.log('   Redirecting to /admin...');
-      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-      
-      navigate('/admin');
-    } else {
-      setError('잘못된 비밀번호입니다');
-      setPassword('');
-    }
+
+    const login = async () => {
+      try {
+        const response = await fetch(
+          `https://${projectId}.supabase.co/functions/v1/make-server-53dba95c/admin/login`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${publicAnonKey}`,
+            },
+            body: JSON.stringify({ password }),
+          },
+        );
+
+        const result = await response.json();
+        if (!response.ok || !result.success || !result.token) {
+          throw new Error(result.error || '관리자 로그인에 실패했습니다');
+        }
+
+        sessionStorage.setItem('admin_authenticated', 'true');
+        sessionStorage.setItem('admin_login_time', Date.now().toString());
+        sessionStorage.setItem('admin_secret', result.token);
+        navigate('/admin');
+      } catch (error) {
+        setError(error instanceof Error ? error.message : '관리자 로그인에 실패했습니다');
+        setPassword('');
+      }
+    };
+
+    login();
   };
 
   return (
@@ -79,9 +84,6 @@ export default function AdminLogin() {
         </form>
 
         <div className="mt-6 text-center space-y-3">
-          <div className="text-xs text-gray-500 bg-gray-50 p-3 rounded-lg">
-            💡 현재 비밀번호: <code className="bg-white px-2 py-1 rounded text-red-600 font-mono">dleogus23@</code>
-          </div>
           <button
             onClick={() => navigate('/')}
             className="text-sm text-gray-600 hover:text-black"

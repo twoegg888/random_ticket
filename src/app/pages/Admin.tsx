@@ -21,38 +21,16 @@ const TICKET_TYPE_NAMES: Record<TicketType, string> = {
 
 // 🔐 관리자 API 호출 헤더 (모든 컴포넌트에서 사용 가능)
 const getAuthHeaders = () => {
-  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-  console.log('🔍 [getAuthHeaders] Checking sessionStorage...');
-  console.log('   sessionStorage.length:', sessionStorage.length);
-  console.log('   sessionStorage keys:', Object.keys(sessionStorage));
-  
   const adminSecret = sessionStorage.getItem('admin_secret');
-  const adminAuth = sessionStorage.getItem('admin_authenticated');
-  const loginTime = sessionStorage.getItem('admin_login_time');
-  
-  console.log('   admin_authenticated:', adminAuth);
-  console.log('   admin_login_time:', loginTime);
-  console.log('   admin_secret:', adminSecret ? `${adminSecret.substring(0, 3)}***` : 'NULL');
   
   if (!adminSecret) {
-    console.error('❌ [getAuthHeaders] No admin_secret in sessionStorage!');
-    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-    
-    // 🚨 에러를 던지지 않고 null 반환
     return null;
   }
   
-  const headers = {
+  return {
     'Authorization': `Bearer ${publicAnonKey}`,
     'X-Admin-Secret': adminSecret,
   };
-  
-  console.log('✅ [getAuthHeaders] Headers created successfully');
-  console.log('   Authorization:', `Bearer ${publicAnonKey.substring(0, 10)}...`);
-  console.log('   X-Admin-Secret:', `${adminSecret.substring(0, 3)}***`);
-  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-  
-  return headers;
 };
 
 export default function Admin() {
@@ -64,27 +42,16 @@ export default function Admin() {
   // 🔥 관리자 인증 체크
   useEffect(() => {
     const checkAuth = async () => {
-      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-      console.log('🔍 [Admin useEffect] Starting auth check...');
-      
       const authenticated = sessionStorage.getItem('admin_authenticated');
       const loginTime = sessionStorage.getItem('admin_login_time');
       const adminSecret = sessionStorage.getItem('admin_secret');
-      
-      console.log('   admin_authenticated:', authenticated);
-      console.log('   admin_login_time:', loginTime);
-      console.log('   admin_secret:', adminSecret ? `${adminSecret.substring(0, 3)}***` : 'NOT FOUND!');
-      
+
       if (!authenticated || authenticated !== 'true') {
-        console.error('❌ [Admin useEffect] Not authenticated!');
-        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
         navigate('/admin/login');
         return;
       }
       
       if (!adminSecret) {
-        console.error('❌ [Admin useEffect] No admin_secret! Redirecting to login...');
-        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
         sessionStorage.clear(); // 세션 클리어
         navigate('/admin/login');
         return;
@@ -96,8 +63,6 @@ export default function Admin() {
         const twoHours = 2 * 60 * 60 * 1000;
         
         if (elapsed > twoHours) {
-          console.warn('⚠️ [Admin useEffect] Session expired!');
-          console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
           sessionStorage.removeItem('admin_authenticated');
           sessionStorage.removeItem('admin_login_time');
           sessionStorage.removeItem('admin_secret');
@@ -105,9 +70,7 @@ export default function Admin() {
           return;
         }
       }
-      
-      console.log('✅ [Admin useEffect] Auth check passed!');
-      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+
       setIsAuthenticated(true);
       setIsChecking(false);
     };
@@ -261,10 +224,6 @@ function DashboardTab({ isAuthenticated }: { isAuthenticated: boolean }) {
       const headers = getAuthHeaders();
       if (!headers) return; // 🚨 헤더가 null이면 종료
       console.log('📊 [fetchStats] Calling /admin/stats...');
-      console.log('📊 [fetchStats] Headers being sent:', {
-        'Authorization': headers['Authorization'] ? headers['Authorization'].substring(0, 20) + '...' : 'NULL',
-        'X-Admin-Secret': headers['X-Admin-Secret'] ? headers['X-Admin-Secret'].substring(0, 3) + '***' : 'NULL'
-      });
       const response = await fetch(
         `https://${projectId}.supabase.co/functions/v1/make-server-53dba95c/admin/stats`,
         {
