@@ -58,7 +58,7 @@
 - ✅ 마이페이지 (포인트 내역, 프로필)
 
 ### 관리자 기능
-- ✅ 관리자 로그인 (비밀번호: dleogus23@)
+- ✅ 관리자 로그인 (Supabase Secret `ADMIN_SECRET` 기반)
 - ✅ 홈 메인 상품 관리
 - ✅ 상품 CRUD (생성/읽기/수정/삭제)
 - ✅ 회원 관리 (조회/수정/삭제)
@@ -191,7 +191,7 @@ Public Keys (공개 가능):
 Secret Keys (보호됨):
 ✅ Supabase Service Role Key (환경변수)
 ✅ 토스 Secret Key (환경변수)
-✅ 관리자 비밀번호 (하드코딩)
+✅ 관리자 인증값 `ADMIN_SECRET` (환경변수)
 ```
 
 ### 보안 점검 결과
@@ -494,7 +494,7 @@ API: PROJECT_DOCUMENTATION.md
 
 ### 중요 비밀번호
 ```
-관리자: dleogus23@
+관리자 인증값: Supabase Secret의 ADMIN_SECRET 사용
 (기타 Secret Key는 환경변수)
 ```
 

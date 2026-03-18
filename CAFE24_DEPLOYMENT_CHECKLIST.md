@@ -347,7 +347,7 @@ F12 → Console 탭
 #### 8-5. 관리자 페이지 테스트
 ```
 □ /admin-login 접속
-□ 비밀번호 입력 (dleogus23@)
+□ Supabase Secret `ADMIN_SECRET` 값으로 로그인
 □ 관리자 페이지 로드
 □ 각 탭 클릭해보기
   - 홈 메인 상품
@@ -454,7 +454,7 @@ redirect_uri을 확인해주세요.
 해결:
 1. 브라우저 개발자도구 → Application → LocalStorage
 2. admin_secret 값이 저장되어 있는지 확인
-3. 값이 "dleogus23@"와 정확히 일치하는지 확인
+3. 값이 로그인 후 발급된 관리자 세션 토큰인지 확인
 4. 브라우저 개발자도구 → Network 탭
 5. API 요청 헤더에 X-Admin-Secret 있는지 확인
 6. 없다면 로그아웃 후 재로그인

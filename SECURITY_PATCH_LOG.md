@@ -5,8 +5,8 @@
 
 ## ⚡️ 최신 변경사항
 - **2026-03-05 18:30** - 관리자 비밀번호 변경 완료
-  - 로그인 비밀번호: `dleogus23@`
-  - API 토큰: `dleogus23@!secure!key!2026`
+  - 로그인 인증값: Supabase Secret `ADMIN_SECRET`
+  - API 토큰: 관리자 세션 토큰 방식으로 전환
 
 ## 패치 내역
 

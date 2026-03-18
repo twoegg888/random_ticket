@@ -11,7 +11,7 @@
 2. FTP로 dist/ 업로드
 3. .htaccess 생성
 4. Supabase CORS 추가
-5. 카카오/토스 URL 변경
+5. 카카오/Cafe24 URL 변경
 6. 테스트!
 ```
 
@@ -269,7 +269,7 @@ https://your-id.cafe24.com/payment/fail
 #### ✅ 관리자 테스트 (5분)
 ```
 □ /admin-login 접속
-□ 비밀번호 입력 (dleogus23@)
+□ Supabase Secret `ADMIN_SECRET` 값으로 로그인
 □ 각 탭 확인
 ```
 

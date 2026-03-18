@@ -133,8 +133,9 @@ export const publicAnonKey = "your-anon-key";
 SUPABASE_URL=https://xxx.supabase.co
 SUPABASE_ANON_KEY=eyJxxx...
 SUPABASE_SERVICE_ROLE_KEY=eyJxxx...
-TOSS_SECRET_KEY=test_sk_xxx
-ADMIN_SECRET=your-password
+ADMIN_SECRET=your-secure-admin-secret
+ALLOWED_ORIGINS=https://your-netlify-domain.netlify.app
+CAFE24_RETURN_BASE_URL=https://your-netlify-domain.netlify.app/payment/success
 ```
 
 #### 3. 카카오 개발자 콘솔 설정
@@ -148,11 +149,12 @@ ADMIN_SECRET=your-password
 5. REST API Key 복사
 ```
 
-#### 4. 토스페이먼츠 설정
+#### 4. 운영 연동 설정
 ```
-1. https://developers.tosspayments.com 접속
-2. Client Key / Secret Key 발급
-3. Success/Fail URL 설정
+1. Netlify 운영 도메인 확인
+2. Kakao Redirect URI 등록
+3. Supabase Secrets에 ADMIN_SECRET / ALLOWED_ORIGINS / Cafe24 값 설정
+4. Cafe24 결제 후 복귀 URL을 /payment/success 로 맞춤
 ```
 
 ### 개발 서버 실행
@@ -410,11 +412,11 @@ netlify deploy --prod
 4. 라우팅 추가
 자세한 내용은 [PROJECT_DOCUMENTATION.md](PROJECT_DOCUMENTATION.md#새로운-티켓-타입-추가)
 
-### Q4: 관리자 비밀번호를 변경하려면?
+### Q4: 관리자 인증값을 변경하려면?
 **A:** 
-```typescript
-// supabase/functions/server/index.tsx
-const ADMIN_SECRET = "new-password";  // 여기 변경
+```bash
+# Supabase Edge Functions secrets
+ADMIN_SECRET=your-new-secure-admin-secret
 ```
 
 ### Q5: 실제 결제를 테스트하려면?

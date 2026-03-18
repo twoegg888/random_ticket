@@ -334,8 +334,8 @@ app.post('/make-server-53dba95c/auth/kakao', async (c) => {
 
 #### 관리자 인증
 ```typescript
-// 하드코딩된 비밀번호 방식
-const ADMIN_SECRET = "dleogus23@";
+// Supabase Secret에 저장된 관리자 인증값 방식
+const ADMIN_SECRET = Deno.env.get("ADMIN_SECRET");
 
 // X-Admin-Secret 헤더로 검증
 const adminSecret = c.req.header("X-Admin-Secret");
@@ -661,7 +661,7 @@ Response:
 ```typescript
 Headers:
 {
-  X-Admin-Secret: "dleogus23@"
+  X-Admin-Secret: "{admin-session-token}"
 }
 
 Request:
@@ -863,7 +863,8 @@ SUPABASE_ANON_KEY=eyJxxx...
 SUPABASE_SERVICE_ROLE_KEY=eyJxxx...
 SUPABASE_DB_URL=postgresql://xxx
 TOSS_SECRET_KEY=test_sk_xxx
-ADMIN_SECRET=dleogus23@
+ADMIN_SECRET=your-secure-admin-secret
+ALLOWED_ORIGINS=https://your-netlify-domain.netlify.app
 ```
 
 ### 카카오 개발자 설정
