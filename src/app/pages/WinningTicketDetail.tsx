@@ -83,30 +83,33 @@ function ActionButtons({ ticket }: { ticket: WinningTicket }) {
   const [showSynthesisModal, setShowSynthesisModal] = useState(false);
   const [showTradeModal, setShowTradeModal] = useState(false);
   const [showRouletteModal, setShowRouletteModal] = useState(false);
-  const { id } = useParams();
-  const { userData, addExchangeTicket } = useApp();
+  const navigate = useNavigate();
+  const { userData, listExchangeTicket } = useApp();
   const [tradePrice, setTradePrice] = useState("");
   
   if (!ticket) return null;
 
-  const handleTradeSubmit = () => {
+  const handleTradeSubmit = async () => {
     const price = parseInt(tradePrice);
     if (!price || price <= 0) {
       alert('올바른 가격을 입력해주세요.');
       return;
     }
 
-    addExchangeTicket({
-      ticketId: ticket.id,
-      ticketType: ticket.ticketType,
-      productName: ticket.productName,
-      productBrand: ticket.productBrand,
-      productImage: ticket.productImage,
-      points: ticket.points,
-      price: price,
-      sellerId: userData.userId,
-      sellerName: userData.userName,
-    });
+    const success = await listExchangeTicket(
+      ticket.id,
+      ticket.ticketType,
+      ticket.productName,
+      ticket.productBrand,
+      ticket.productImage,
+      ticket.points,
+      price,
+    );
+
+    if (!success) {
+      alert('거래소 등록에 실패했습니다.');
+      return;
+    }
 
     alert(`${price.toLocaleString()}P에 거래소에 등록되었습니다!`);
     setShowTradeModal(false);

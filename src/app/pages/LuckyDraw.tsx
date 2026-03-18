@@ -18,7 +18,7 @@ type LuckyDrawProduct = {
 export default function LuckyDraw() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { userData, isLoggedIn, isInitialized } = useApp();
+  const { userData, isLoggedIn, isInitialized, enterLuckyDraw } = useApp();
   const [luckyDraws, setLuckyDraws] = useState<LuckyDrawProduct[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -77,26 +77,12 @@ export default function LuckyDraw() {
     }
 
     try {
-      const response = await fetch(
-        `https://${projectId}.supabase.co/functions/v1/make-server-53dba95c/lucky-draw/${draw.id}/enter`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${publicAnonKey}`,
-          },
-          body: JSON.stringify({
-            kakaoId: userData.kakaoId,
-          }),
-        }
-      );
+      const success = await enterLuckyDraw(draw.id, draw.name, draw.entryPoints);
 
-      const data = await response.json();
-
-      if (data.success) {
+      if (success) {
         alert('럭키드로우에 참여했습니다!');
       } else {
-        alert(data.error || '참여에 실패했습니다.');
+        alert('참여에 실패했습니다.');
       }
     } catch (error) {
       alert('참여 중 오류가 발생했습니다.');

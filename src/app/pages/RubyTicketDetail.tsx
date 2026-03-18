@@ -87,7 +87,7 @@ export default function RubyTicketDetail() {
   const [isDrawing, setIsDrawing] = useState(false);
   const [ticketCount, setTicketCount] = useState(1);
   const navigate = useNavigate();
-  const { userData, deductPoints, buyTicket } = useApp();
+  const { userData, purchaseAtomicTicket } = useApp();
 
   const ticketPrice = TICKET_PRICES.ruby;
   const maxTickets = Math.floor(userData.points / ticketPrice);
@@ -113,48 +113,51 @@ export default function RubyTicketDetail() {
     setIsModalOpen(true);
   };
 
-  const handleDraw = () => {
-    const totalCost = ticketPrice * ticketCount;
-    
-    // 포인트 차감
-    const success = deductPoints(
-      totalCost,
-      `루비 티켓 ${ticketCount}장 뽑기`,
-      'ticket_draw',
-      'ruby'
-    );
-
-    if (!success) {
-      alert('포인트가 부족합니다.');
-      return;
-    }
+  const handleDraw = async () => {
 
     setIsModalOpen(false);
     setIsDrawing(true);
     
     // 3초 후 당첨 티켓 추가 및 홈으로 이동
-    setTimeout(() => {
+    setTimeout(async () => {
       // 간단한 루비 티켓 상품 예시
       const rubyProducts = [
         { name: '스타벅스 아메리카노', brand: 'Starbucks', points: 1500, image: 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=400&h=400&fit=crop' },
         { name: '편의점 스낵', brand: 'GS25', points: 800, image: 'https://images.unsplash.com/photo-1599490659213-e2b9527bd087?w=400&h=400&fit=crop' },
         { name: '과자 세트', brand: '오리온', points: 500, image: 'https://images.unsplash.com/photo-1621939514649-280e2ee25f60?w=400&h=400&fit=crop' },
       ];
-      
-      // 랜덤 상품 선택
-      const randomProduct = rubyProducts[Math.floor(Math.random() * rubyProducts.length)];
-      
-      // 당첨 티켓 추가
-      buyTicket({
-        ticketType: 'ruby',
-        productName: randomProduct.name,
-        productBrand: randomProduct.brand,
-        productImage: randomProduct.image,
-        points: randomProduct.points,
-      });
-      
+
+      const selectedProducts = Array.from({ length: ticketCount }, () =>
+        rubyProducts[Math.floor(Math.random() * rubyProducts.length)]
+      );
+
+      let success = true;
+      for (const product of selectedProducts) {
+        const result = await purchaseAtomicTicket({
+          ticketData: {
+            ticketType: 'ruby',
+            productName: product.name,
+            productBrand: product.brand,
+            productImage: product.image,
+            points: product.points,
+          },
+          points: ticketPrice,
+        });
+
+        if (!result) {
+          success = false;
+          break;
+        }
+      }
+
       setIsDrawing(false);
-      alert(`${ticketCount}장의 티켓을 뽑았습니다!\n당첨 상품: ${randomProduct.name}\n당첨 티켓은 보관함에서 확인하세요.`);
+
+      if (!success) {
+        alert('티켓 저장에 실패했습니다. 다시 시도해주세요.');
+        return;
+      }
+
+      alert(`${ticketCount}장의 티켓을 뽑았습니다!\n당첨 티켓은 보관함에서 확인하세요.`);
       navigate('/');
     }, 3000);
   };

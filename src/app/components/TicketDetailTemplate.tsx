@@ -73,7 +73,7 @@ export default function TicketDetailTemplate({
   const [showWinning, setShowWinning] = useState(false);
   const [ticketCount, setTicketCount] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const { userData, deductPoints, buyTicket, isLoggedIn, isInitialized } = useApp();
+  const { userData, purchaseAtomicTicket, isLoggedIn, isInitialized } = useApp();
   
   // 🔥 백엔드에서 상품 데이터 가져오기
   const [products, setProducts] = useState<Array<{
@@ -180,16 +180,6 @@ export default function TicketDetailTemplate({
     console.log('   총 비용:', totalCost);
     console.log('   등록된 상품 수:', products.length);
 
-    // 포인트 차감
-    const success = await deductPoints(totalCost, `${ticketName} ${ticketCount}장 구매`, 'ticket_purchase');
-    
-    if (!success) {
-      alert('포인트가 부족합니다.');
-      return;
-    }
-
-    console.log('✅ [handleDraw] 포인트 차감 완료');
-
     // 🔥 여러 개 뽑기: ticketCount만큼 반복
     const selectedProducts = [];
     for (let i = 0; i < ticketCount; i++) {
@@ -249,14 +239,24 @@ export default function TicketDetailTemplate({
     // 현재 당첨 상품 저장
     const currentProduct = wonProducts[currentWonIndex];
     console.log('💾 [handleCloseWinning] 상품 저장 중:', currentProduct);
-    
-    await buyTicket({
-      ticketType: ticketTypeMap[ticketName] || 'ruby',
-      productName: currentProduct.name,
-      productBrand: currentProduct.brand,
-      productImage: currentProduct.image,
-      points: currentProduct.points,
+
+    const ticketTypeValue = ticketTypeMap[ticketName] || 'ruby';
+    const ticketPriceNum = TICKET_PRICES[TICKET_NAME_TO_TYPE[ticketName]] || 0;
+    const success = await purchaseAtomicTicket({
+      ticketData: {
+        ticketType: ticketTypeValue,
+        productName: currentProduct.name,
+        productBrand: currentProduct.brand,
+        productImage: currentProduct.image,
+        points: currentProduct.points,
+      },
+      points: ticketPriceNum,
     });
+
+    if (!success) {
+      alert('티켓 저장에 실패했습니다. 다시 시도해주세요.');
+      return;
+    }
 
     // 다음 상품이 있으면 다음 상품 표시
     if (currentWonIndex < wonProducts.length - 1) {

@@ -16,6 +16,10 @@ export interface AppContextType {
 
   // 티켓 관리
   buyTicket: (ticket: Omit<WinningTicket, 'id' | 'wonAt' | 'status'>) => Promise<void>;
+  purchaseAtomicTicket: (params: {
+    ticketData: Omit<WinningTicket, 'id' | 'wonAt' | 'status'>;
+    points: number;
+  }) => Promise<boolean>;
   updateTicket: (ticketId: string, updates: Partial<WinningTicket>) => Promise<void>;
   convertTicketToPoints: (ticketId: string, finalPoints: number, multiplier: number) => Promise<boolean>;
 
@@ -25,8 +29,8 @@ export interface AppContextType {
   fetchExchangeTickets: (status?: string) => Promise<ExchangeTicket[]>;
 
   // 럭키드로우
-  enterLuckyDraw: (productId: number, productName: string, entryPoints: number) => Promise<boolean>;
-  getLuckyDrawEntries: (productId: number) => Promise<number>;
+  enterLuckyDraw: (productId: number | string, productName: string, entryPoints: number) => Promise<boolean>;
+  getLuckyDrawEntries: (productId: number | string) => Promise<number>;
 
   // 배송 요청
   requestShipping: (ticketId: string, shippingInfo: any) => Promise<boolean>;
@@ -254,6 +258,42 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const purchaseAtomicTicket = async ({
+    ticketData,
+    points,
+  }: {
+    ticketData: Omit<WinningTicket, 'id' | 'wonAt' | 'status'>;
+    points: number;
+  }): Promise<boolean> => {
+    if (!userData.kakaoId) return false;
+
+    try {
+      const response = await fetch(`${API_BASE}/user/${userData.kakaoId}/tickets/purchase-atomic`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${publicAnonKey}`,
+        },
+        body: JSON.stringify({
+          ticketData,
+          points,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        await refreshUserData();
+        return true;
+      }
+
+      return false;
+    } catch (error) {
+      console.error('Failed to purchase ticket atomically:', error);
+      return false;
+    }
+  };
+
   // 티켓 업데이트
   const updateTicket = async (ticketId: string, updates: Partial<WinningTicket>) => {
     if (!userData.kakaoId) return;
@@ -406,7 +446,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   };
 
   // 럭키드로우 참여
-  const enterLuckyDraw = async (productId: number, productName: string, entryPoints: number): Promise<boolean> => {
+  const enterLuckyDraw = async (productId: number | string, productName: string, entryPoints: number): Promise<boolean> => {
     if (!userData.kakaoId) return false;
     
     try {
@@ -438,7 +478,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   };
 
   // 럭키드로우 참여자 수 조회
-  const getLuckyDrawEntries = async (productId: number): Promise<number> => {
+  const getLuckyDrawEntries = async (productId: number | string): Promise<number> => {
     try {
       const response = await fetch(`${API_BASE}/lucky-draw/${productId}/entries`, {
         headers: {
@@ -591,6 +631,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         addPoints,
         deductPoints,
         buyTicket,
+        purchaseAtomicTicket,
         updateTicket,
         convertTicketToPoints,
         listExchangeTicket,
