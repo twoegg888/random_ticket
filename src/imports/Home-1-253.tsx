@@ -1,13 +1,9 @@
 import { Link as RouterLink } from "react-router";
 import { useState, useEffect } from "react";
 import svgPaths from "./svg-njoq4gzm16";
-import img456 from "figma:asset/ae2af3bece6473c99295a2a3b53749f17ada8851.png";
-import img458 from "figma:asset/ad778549c7dce53f4cc581c76265cc1e8d2703f6.png";
 import img470 from "figma:asset/8196bc965d008081e9d4303c0fdf4b5562e07ad1.png";
 import img468 from "figma:asset/6d239e62119a6331f715fe267c8cb5bcf15745d6.png";
 import img467 from "figma:asset/9152485ec268fd3e2f7e4678a722ae075f0bd887.png";
-import img466 from "figma:asset/a9dbf0d55cefb05c4def32b65330fee4df00d4e6.png";
-import img465 from "figma:asset/87f47f5fa3c15d978aaaec78812512283e478ac1.png";
 import img464 from "figma:asset/647c3c21ac6634534afa7150ab9d6d202fb686b3.png";
 import imgBanner1 from "figma:asset/805896226fd2f028ef2a11adc5383356de68c2b1.png";
 import { projectId, publicAnonKey } from '../../utils/supabase/info';
@@ -76,9 +72,6 @@ function ProductShowcase() {
       'gold': '/tickets/gold',
       'platinum': '/tickets/platinum',
       'ruby': '/tickets/ruby',
-      'jewelry': '/tickets/jewelry',
-      'beauty': '/tickets/beauty',
-      'meat': '/tickets/meat',
     };
     return pathMap[ticketType] || '/';
   };
@@ -195,7 +188,7 @@ function Margin1() {
   return (
     <div className="content-stretch flex flex-col items-start pt-[8px] relative shrink-0" data-name="Margin">
       <div className="flex flex-col font-['Inter:Regular','Noto_Sans_KR:Regular',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[#aeaeae] text-[9.375px] whitespace-nowrap">
-        <p className="leading-[13px]">당첨 티켓</p>
+        <p className="leading-[13px]">당첨 박스</p>
       </div>
     </div>
   );
@@ -413,38 +406,29 @@ export default function Home() {
         <img alt="Centbox" className="h-full w-full object-contain object-left" src={BRAND_LOGO_URL} />
       </div>
       <ProductShowcase />
-      <RouterLink to="/ticket/beauty" className="absolute h-[139px] left-[25px] top-[1155px] w-[434px] cursor-pointer z-10" data-name="456">
-        <img alt="뷰티 티켓" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full" src={img456} />
+      <RouterLink to="/ticket/gold" className="absolute h-[139px] left-[25px] top-[1155px] w-[434px] cursor-pointer z-10" data-name="456">
+        <img alt="골드 박스" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full" src={img464} />
       </RouterLink>
-      <RouterLink to="/ticket/meat" className="absolute h-[139px] left-[25px] top-[1003px] w-[434px] cursor-pointer z-10" data-name="458">
-        <img alt="미트 티켓" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full" src={img458} />
+      <RouterLink to="/ticket/diamond" className="absolute h-[139px] left-[25px] top-[1003px] w-[434px] cursor-pointer z-10" data-name="458">
+        <img alt="다이아 박스" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full" src={img470} />
       </RouterLink>
       <div className="absolute h-[139px] left-[25px] top-[851px] w-[434px]" data-name="459">
-        <img alt="" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full" src={img458} />
+        <img alt="" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full" src={img467} />
       </div>
-      <RouterLink to="/ticket/diamond" className="absolute h-[139px] left-[25px] top-[1459px] w-[434px] cursor-pointer z-10" data-name="470">
-        <img alt="다이아 티켓" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full" src={img470} />
-      </RouterLink>
-      <RouterLink to="/ticket/ruby" className="absolute h-[139px] left-[25px] top-[1763px] w-[434px] cursor-pointer z-10" data-name="468">
-        <img alt="루비 티켓" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full" src={img468} />
-      </RouterLink>
-      <RouterLink to="/ticket/platinum" className="absolute h-[139px] left-[25px] top-[1307px] w-[434px] cursor-pointer z-10" data-name="467">
-        <img alt="플래티넘 티켓" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full" src={img467} />
+      <RouterLink to="/ticket/platinum" className="absolute h-[139px] left-[25px] top-[851px] w-[434px] cursor-pointer z-10" data-name="467">
+        <img alt="플래티넘 박스" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full" src={img467} />
       </RouterLink>
       <div className="absolute h-[139px] left-[25px] top-[1003px] w-[434px]" data-name="466">
-        <img alt="" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full" src={img466} />
-      </div>
-      <RouterLink to="/ticket/jewelry" className="absolute h-[139px] left-[25px] top-[851px] w-[434px] cursor-pointer z-10" data-name="465">
-        <img alt="주얼리 티켓" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full" src={img465} />
-      </RouterLink>
-      <RouterLink to="/ticket/gold" className="absolute h-[139px] left-[25px] top-[1611px] w-[434px] cursor-pointer z-10" data-name="464">
-        <img alt="골드 티켓" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full" src={img464} />
-      </RouterLink>
-      <div className="absolute h-[139px] left-[25px] top-[1459px] w-[434px]" data-name="461">
-        <img alt="" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full" src={img458} />
-      </div>
-      <div className="absolute h-[139px] left-[25px] top-[1459px] w-[434px]" data-name="457">
         <img alt="" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full" src={img470} />
+      </div>
+      <RouterLink to="/ticket/ruby" className="absolute h-[139px] left-[25px] top-[1307px] w-[434px] cursor-pointer z-10" data-name="468">
+        <img alt="루비 박스" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full" src={img468} />
+      </RouterLink>
+      <div className="absolute h-[139px] left-[25px] top-[1155px] w-[434px]" data-name="464">
+        <img alt="" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full" src={img464} />
+      </div>
+      <div className="absolute h-[139px] left-[25px] top-[1307px] w-[434px]" data-name="457">
+        <img alt="" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full" src={img468} />
       </div>
       <div className="-translate-y-1/2 absolute flex flex-col font-['Pretendard:Bold',sans-serif] justify-center leading-[0] left-[25px] not-italic text-[#020202] text-[23px] top-[813.5px] tracking-[1.38px] whitespace-nowrap">
         <p className="leading-[normal]">
@@ -454,55 +438,37 @@ export default function Home() {
         </p>
       </div>
       <div className="-translate-y-1/2 absolute flex flex-col font-['Pretendard:Bold',sans-serif] justify-center leading-[0] left-[26px] not-italic text-[#020202] text-[23px] top-[784.5px] tracking-[0.46px] whitespace-nowrap">
-        <p className="leading-[normal]">티켓 뽑기에</p>
+        <p className="leading-[normal]">박스 오픈에</p>
       </div>
       <div className="-translate-y-1/2 absolute flex flex-col font-['Pretendard:Regular',sans-serif] justify-center leading-[0] left-[59px] not-italic text-[#020202] text-[14px] top-[904.5px] whitespace-nowrap z-20">
-        <p className="leading-[normal]">주얼리 티켓</p>
+        <p className="leading-[normal]">플래티넘 박스</p>
       </div>
       <div className="-translate-y-1/2 absolute flex flex-col font-['Pretendard:SemiBold',sans-serif] justify-center leading-[0] left-[59px] not-italic text-[#020202] text-[20px] top-[933px] whitespace-nowrap z-20">
-        <p className="leading-[normal]">19,900P</p>
-      </div>
-      <div className="-translate-y-1/2 absolute flex flex-col font-['Pretendard:Regular',sans-serif] justify-center leading-[0] left-[59px] not-italic text-[#020202] text-[14px] top-[1056.5px] whitespace-nowrap z-20">
-        <p className="leading-[normal]">미트 티켓</p>
-      </div>
-      <div className="-translate-y-1/2 absolute flex flex-col font-['Pretendard:SemiBold',sans-serif] justify-center leading-[0] left-[59px] not-italic text-[#020202] text-[20px] top-[1085px] whitespace-nowrap z-20">
-        <p className="leading-[normal]">39,900P</p>
-      </div>
-      <div className="-translate-y-1/2 absolute flex flex-col font-['Pretendard:Regular',sans-serif] justify-center leading-[0] left-[59px] not-italic text-[#020202] text-[14px] top-[1208.5px] whitespace-nowrap z-20">
-        <p className="leading-[normal]">뷰티 티켓</p>
-      </div>
-      <div className="-translate-y-1/2 absolute flex flex-col font-['Pretendard:SemiBold',sans-serif] justify-center leading-[0] left-[59px] not-italic text-[#020202] text-[20px] top-[1237px] whitespace-nowrap z-20">
-        <p className="leading-[normal]">24,900P</p>
-      </div>
-      <div className="-translate-y-1/2 absolute flex flex-col font-['Pretendard:Regular',sans-serif] justify-center leading-[0] left-[59px] not-italic text-[#020202] text-[14px] top-[1360.5px] whitespace-nowrap z-20">
-        <p className="leading-[normal]">플래티넘 티켓</p>
-      </div>
-      <div className="-translate-y-1/2 absolute flex flex-col font-['Pretendard:SemiBold',sans-serif] justify-center leading-[0] left-[59px] not-italic text-[#020202] text-[20px] top-[1389px] whitespace-nowrap z-20">
         <p className="leading-[normal]">99,000P</p>
       </div>
-      <div className="-translate-y-1/2 absolute flex flex-col font-['Pretendard:Regular',sans-serif] justify-center leading-[0] left-[59px] not-italic text-[#020202] text-[14px] top-[1512.5px] whitespace-nowrap z-20">
-        <p className="leading-[normal]">다이아 티켓</p>
+      <div className="-translate-y-1/2 absolute flex flex-col font-['Pretendard:Regular',sans-serif] justify-center leading-[0] left-[59px] not-italic text-[#020202] text-[14px] top-[1056.5px] whitespace-nowrap z-20">
+        <p className="leading-[normal]">다이아 박스</p>
       </div>
-      <div className="-translate-y-1/2 absolute flex flex-col font-['Pretendard:SemiBold',sans-serif] justify-center leading-[0] left-[59px] not-italic text-[#020202] text-[20px] top-[1541px] whitespace-nowrap z-20">
+      <div className="-translate-y-1/2 absolute flex flex-col font-['Pretendard:SemiBold',sans-serif] justify-center leading-[0] left-[59px] not-italic text-[#020202] text-[20px] top-[1085px] whitespace-nowrap z-20">
         <p className="leading-[normal]">49,000P</p>
       </div>
-      <div className="-translate-y-1/2 absolute flex flex-col font-['Pretendard:Regular',sans-serif] justify-center leading-[0] left-[59px] not-italic text-[#020202] text-[14px] top-[1664.5px] whitespace-nowrap z-20">
-        <p className="leading-[normal]">골드 티켓</p>
+      <div className="-translate-y-1/2 absolute flex flex-col font-['Pretendard:Regular',sans-serif] justify-center leading-[0] left-[59px] not-italic text-[#020202] text-[14px] top-[1208.5px] whitespace-nowrap z-20">
+        <p className="leading-[normal]">골드 박스</p>
       </div>
-      <div className="-translate-y-1/2 absolute flex flex-col font-['Pretendard:SemiBold',sans-serif] justify-center leading-[0] left-[59px] not-italic text-[#020202] text-[20px] top-[1693px] whitespace-nowrap z-20">
+      <div className="-translate-y-1/2 absolute flex flex-col font-['Pretendard:SemiBold',sans-serif] justify-center leading-[0] left-[59px] not-italic text-[#020202] text-[20px] top-[1237px] whitespace-nowrap z-20">
         <p className="leading-[normal]">14,900P</p>
       </div>
-      <div className="-translate-y-1/2 absolute flex flex-col font-['Pretendard:Regular',sans-serif] justify-center leading-[0] left-[59px] not-italic text-[#020202] text-[14px] top-[1816.5px] whitespace-nowrap z-20">
-        <p className="leading-[normal]">루비 티켓</p>
+      <div className="-translate-y-1/2 absolute flex flex-col font-['Pretendard:Regular',sans-serif] justify-center leading-[0] left-[59px] not-italic text-[#020202] text-[14px] top-[1360.5px] whitespace-nowrap z-20">
+        <p className="leading-[normal]">루비 박스</p>
       </div>
-      <div className="-translate-y-1/2 absolute flex flex-col font-['Pretendard:SemiBold',sans-serif] justify-center leading-[0] left-[59px] not-italic text-[#020202] text-[20px] top-[1845px] whitespace-nowrap z-20">
+      <div className="-translate-y-1/2 absolute flex flex-col font-['Pretendard:SemiBold',sans-serif] justify-center leading-[0] left-[59px] not-italic text-[#020202] text-[20px] top-[1389px] whitespace-nowrap z-20">
         <p className="leading-[normal]">9,900P</p>
       </div>
       <div className="-translate-y-1/2 absolute flex flex-col font-['Pretendard:Bold',sans-serif] justify-center leading-[0] left-[25px] not-italic text-[#020202] text-[23px] top-[432.5px] tracking-[0.46px] whitespace-nowrap">
         <p className="leading-[normal]">상품이 나왔을까요?</p>
       </div>
       <div className="-translate-y-1/2 absolute flex flex-col font-['Pretendard:Bold',sans-serif] justify-center leading-[0] left-[26px] not-italic text-[#020202] text-[23px] top-[403.5px] tracking-[0.46px] whitespace-nowrap">
-        <p className="leading-[normal]">티켓에서 어떤</p>
+        <p className="leading-[normal]">박스에서 어떤</p>
       </div>
       <div className="absolute h-[289px] left-[24px] rounded-[12px] top-[57px] w-[433px]" data-name="banner 1">
         <img alt="" className="absolute inset-0 max-w-none object-cover pointer-events-none rounded-[12px] size-full" src={imgBanner1} />

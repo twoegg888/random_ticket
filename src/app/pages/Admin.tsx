@@ -7,16 +7,13 @@ import { useApp } from "../context/AppContext";
 import * as XLSX from 'xlsx';
 
 type Tab = 'dashboard' | 'users' | 'products' | 'luckydraws' | 'shipping' | 'homeproducts';
-type TicketType = 'diamond' | 'gold' | 'platinum' | 'ruby' | 'jewelry' | 'beauty' | 'meat';
+type TicketType = 'diamond' | 'gold' | 'platinum' | 'ruby';
 
 const TICKET_TYPE_NAMES: Record<TicketType, string> = {
-  diamond: '다이아 티켓',
-  gold: '골드 티켓',
-  platinum: '플래티넘 티켓',
-  ruby: '루비 티켓',
-  jewelry: '주얼리 티켓',
-  beauty: '뷰티 티켓',
-  meat: '미트 티켓',
+  diamond: '다이아 박스',
+  gold: '골드 박스',
+  platinum: '플래티넘 박스',
+  ruby: '루비 박스',
 };
 
 // 🔐 관리자 API 호출 헤더 (모든 컴포넌트에서 사용 가능)
@@ -299,7 +296,7 @@ function DashboardTab({ isAuthenticated }: { isAuthenticated: boolean }) {
               </div>
               <div className="ml-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">티켓 판매 수</dt>
+                  <dt className="text-sm font-medium text-gray-500 truncate">박스 판매 수</dt>
                   <dd className="text-3xl font-semibold text-gray-900">{stats?.totalTicketsSold || 0}</dd>
                 </dl>
               </div>
@@ -311,7 +308,7 @@ function DashboardTab({ isAuthenticated }: { isAuthenticated: boolean }) {
       <div className="bg-white shadow rounded-lg p-6">
         <h3 className="text-lg font-medium text-gray-900 mb-4">⚠️ 관리자 알림</h3>
         <div className="space-y-2 text-sm text-gray-600">
-          <p>• 상품 관리 탭에서 티켓별 당첨 상품을 추가/수정할 수 있습니다.</p>
+          <p>• 상품 관리 탭에서 박스별 당첨 상품을 추가/수정할 수 있습니다.</p>
           <p>• 회원 ���리 탭에서 포인트를 직접 충전/차감할 수 있습니다.</p>
           <p>• 럭키드로우 탭에서 이벤트를 생성하고 당첨자를 선정할 수 있습니다.</p>
         </div>
@@ -626,7 +623,7 @@ function ProductsTab({ isAuthenticated }: { isAuthenticated: boolean }) {
   const handleDownloadTemplate = () => {
     const templateData = [
       {
-        '티켓타입': 'diamond',
+        '박스타입': 'diamond',
         '상품명': 'iPhone 15 Pro Max',
         '브랜드': 'Apple',
         '포인트': 50000,
@@ -635,7 +632,7 @@ function ProductsTab({ isAuthenticated }: { isAuthenticated: boolean }) {
         '이미지URL': 'https://images.unsplash.com/photo-1632633728024-e1fd4bef561a',
       },
       {
-        '티켓타입': 'gold',
+        '박스타입': 'gold',
         '상품명': 'AirPods Pro',
         '브랜드': 'Apple',
         '포인트': 15000,
@@ -644,13 +641,13 @@ function ProductsTab({ isAuthenticated }: { isAuthenticated: boolean }) {
         '이미지URL': 'https://images.unsplash.com/photo-1606841837239-c5a1a4a07af7',
       },
       {
-        '티켓타입': 'beauty',
-        '상품명': '설화수 자음생 크림',
-        '브랜드': '설화수',
-        '포인트': 25000,
+        '박스타입': 'ruby',
+        '상품명': 'CU 모바일 상품권 3만원',
+        '브랜드': 'CU',
+        '포인트': 10000,
         '가중치': 15,
         '재고': 100,
-        '이미지URL': 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be',
+        '이미지URL': 'https://images.unsplash.com/photo-1542838132-92c53300491e',
       },
     ];
 
@@ -660,7 +657,7 @@ function ProductsTab({ isAuthenticated }: { isAuthenticated: boolean }) {
     
     // 열 너비 설정
     ws['!cols'] = [
-      { wch: 12 }, // 티켓타입
+      { wch: 12 }, // 박스타입
       { wch: 25 }, // 상품명
       { wch: 15 }, // 브랜드
       { wch: 10 }, // 포인트
@@ -700,8 +697,8 @@ function ProductsTab({ isAuthenticated }: { isAuthenticated: boolean }) {
         const rowNum = index + 2; // 엑셀 행 번호 (헤더 포함)
         
         // 필수 필드 확인
-        if (!row['티켓타입']) {
-          errors.push(`${rowNum}행: 티켓타입이 없습니다.`);
+        if (!row['박스타입']) {
+          errors.push(`${rowNum}행: 박스타입이 없습니다.`);
           return;
         }
         if (!row['상품명']) {
@@ -718,10 +715,10 @@ function ProductsTab({ isAuthenticated }: { isAuthenticated: boolean }) {
         }
 
         // 티켓 타입 검증
-        const ticketType = String(row['티켓타입']).toLowerCase();
-        const validTicketTypes = ['diamond', 'gold', 'platinum', 'ruby', 'jewelry', 'beauty', 'meat'];
+        const ticketType = String(row['박스타입']).toLowerCase();
+        const validTicketTypes = ['diamond', 'gold', 'platinum', 'ruby'];
         if (!validTicketTypes.includes(ticketType)) {
-          errors.push(`${rowNum}행: 잘못된 티켓타입 (${row['티켓타입']}). 가능한 값: ${validTicketTypes.join(', ')}`);
+          errors.push(`${rowNum}행: 잘못된 박스타입 (${row['박스타입']}). 가능한 값: ${validTicketTypes.join(', ')}`);
           return;
         }
 
@@ -859,16 +856,16 @@ function ProductsTab({ isAuthenticated }: { isAuthenticated: boolean }) {
         <h3 className="text-sm font-medium text-blue-900 mb-2">💡 엑셀 일괄 등록 사용 방법</h3>
         <ol className="text-xs text-blue-700 space-y-1 list-decimal list-inside">
           <li><strong>템플릿 다운로드</strong> 버튼을 클릭하여 엑셀 템플릿을 다운로드합니다.</li>
-          <li>템플릿에 상품 정보를 입력합니다. (티켓타입, 상품명, 브랜드, 포인트, 가중치, 재고, 이미지URL)</li>
+          <li>템플릿에 상품 정보를 입력합니다. (박스타입, 상품명, 브랜드, 포인트, 가중치, 재고, 이미지URL)</li>
           <li><strong>엑셀 일괄등록</strong> 버튼을 클릭하여 작성한 파일을 업로드합니다.</li>
           <li>검증 후 일괄 등록됩니다.</li>
         </ol>
         <p className="text-xs text-blue-600 mt-2">
-          ⚠️ 티켓타입: diamond, gold, platinum, ruby, jewelry, beauty, meat 중 하나여야 합니다.
+          ⚠️ 박스타입: diamond, gold, platinum, ruby 중 하나여야 합니다.
         </p>
       </div>
 
-      {/* 티켓 타입 선택 */}
+      {/* 박스 타입 선택 */}
       <div className="flex gap-2 flex-wrap">
         {(Object.keys(TICKET_TYPE_NAMES) as TicketType[]).map((type) => (
           <button

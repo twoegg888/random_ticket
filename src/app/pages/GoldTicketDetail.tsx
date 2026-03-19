@@ -4,7 +4,7 @@ import imgGold from "figma:asset/fa1f6a548a94aeafe98cb1c1b77f91a89f5ff7ca.png";
 export default function GoldTicketDetail() {
   return (
     <TicketDetailTemplate
-      ticketName="골드 티켓"
+      ticketName="골드 박스"
       ticketPrice="14,900P"
       mainImage={imgGold}
       drawAnimationImage={imgGold}

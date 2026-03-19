@@ -5,7 +5,7 @@ import imgDrawAnimation from "figma:asset/915fa6551696b9d851e927eea54af0715e8833
 export default function PlatinumTicketDetail() {
   return (
     <TicketDetailTemplate
-      ticketName="플래티넘 티켓"
+      ticketName="플래티넘 박스"
       ticketPrice="99,900P"
       mainImage={imgPlatinum}
       drawAnimationImage={imgDrawAnimation}

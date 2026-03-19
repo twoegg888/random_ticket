@@ -204,7 +204,7 @@ function BottomNav() {
           </svg>
         </div>
       </NavItem>
-      <NavItem to="/winning-tickets" label="당첨 티켓">
+      <NavItem to="/winning-tickets" label="당첨 박스">
         <div className="size-[24px]">
           <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 24 24">
             <path d={svgPaths.p25895e80} fill="#DDDDDD" />

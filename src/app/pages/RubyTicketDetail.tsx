@@ -25,7 +25,7 @@ function Group1() {
   return (
     <div className="absolute contents leading-[0] left-[192px] not-italic text-[#020202] top-[365px] whitespace-nowrap">
       <div className="-translate-y-1/2 absolute flex flex-col font-['Pretendard:Regular',sans-serif] justify-center left-[206px] text-[18px] top-[375.5px]">
-        <p className="leading-[normal]">루비 티켓</p>
+        <p className="leading-[normal]">루비 박스</p>
       </div>
       <div className="-translate-y-1/2 absolute flex flex-col font-['Pretendard:SemiBold',sans-serif] justify-center left-[192px] text-[28px] top-[410.5px]">
         <p className="leading-[normal]">9,900P</p>
@@ -153,11 +153,11 @@ export default function RubyTicketDetail() {
       setIsDrawing(false);
 
       if (!success) {
-        alert('티켓 저장에 실패했습니다. 다시 시도해주세요.');
+        alert('박스 저장에 실패했습니다. 다시 시도해주세요.');
         return;
       }
 
-      alert(`${ticketCount}장의 티켓을 뽑았습니다!\n당첨 티켓은 보관함에서 확인하세요.`);
+      alert(`${ticketCount}개의 박스를 오픈했습니다!\n당첨 박스는 보관함에서 확인하세요.`);
       navigate('/');
     }, 3000);
   };
@@ -172,7 +172,7 @@ export default function RubyTicketDetail() {
           </svg>
         </Link>
         <div className="flex-1 text-center">
-          <h1 className="font-['Noto_Sans_KR:Bold',sans-serif] text-[20px] text-black">루비 티켓</h1>
+          <h1 className="font-['Noto_Sans_KR:Bold',sans-serif] text-[20px] text-black">루비 박스</h1>
         </div>
         <div className="w-[24px]" />
       </div>
@@ -188,7 +188,7 @@ export default function RubyTicketDetail() {
         <Group3 />
         <div className="absolute bg-[#eaeaea] h-[7px] left-0 top-[711px] w-[480px]" />
         <div className="-translate-y-1/2 absolute flex flex-col font-['Pretendard:Bold',sans-serif] justify-center leading-[0] left-[23px] not-italic text-[#020202] text-[20px] top-[772px] whitespace-nowrap">
-          <p className="leading-[normal]">당첨 가능 티켓</p>
+          <p className="leading-[normal]">당첨 가능 상품</p>
         </div>
         <div className="absolute bg-white h-[69px] left-0 top-[953px] w-[480px]" />
         
@@ -215,9 +215,9 @@ export default function RubyTicketDetail() {
           <img alt="" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full" src={imgImgLuckTemperatureMiddle1LkHcMg1} />
         </div>
         <p className="absolute font-['Inter:Regular','Noto_Sans_KR:Regular',sans-serif] font-normal leading-[normal] left-[48px] not-italic text-[#747473] text-[12px] top-[583px] tracking-[-0.6px]">행운 온도</p>
-        <p className="absolute font-['Inter:Semi_Bold','Noto_Sans_KR:Bold',sans-serif] font-semibold leading-[normal] left-[48px] not-italic text-[#020202] text-[12px] top-[463px] tracking-[-0.6px]">당첨 티켓</p>
+        <p className="absolute font-['Inter:Semi_Bold','Noto_Sans_KR:Bold',sans-serif] font-semibold leading-[normal] left-[48px] not-italic text-[#020202] text-[12px] top-[463px] tracking-[-0.6px]">당첨 박스</p>
         <p className="absolute font-['Inter:Regular','Noto_Sans_KR:Regular',sans-serif] font-normal leading-[normal] left-[112px] not-italic text-[#747473] text-[12px] top-[463px] tracking-[-0.6px]">뽑기 후 즉시 보관함에서 확인 가능</p>
-        <p className="absolute font-['Inter:Semi_Bold','Noto_Sans_KR:Bold',sans-serif] font-semibold leading-[normal] left-[48px] not-italic text-[#020202] text-[12px] top-[485px] tracking-[-0.6px]">실물 티켓</p>
+        <p className="absolute font-['Inter:Semi_Bold','Noto_Sans_KR:Bold',sans-serif] font-semibold leading-[normal] left-[48px] not-italic text-[#020202] text-[12px] top-[485px] tracking-[-0.6px]">실물 상품</p>
         <p className="absolute font-['Inter:Regular','Noto_Sans_KR:Regular',sans-serif] font-normal leading-[normal] left-[112px] not-italic text-[#747473] text-[12px] top-[485px] tracking-[-0.6px]">보관함에서 발송 요청 후 카카오톡으로 수령</p>
         <p className="absolute font-['Inter:Semi_Bold','Noto_Sans_KR:Bold',sans-serif] font-semibold leading-[normal] left-[48px] not-italic text-[#020202] text-[12px] top-[507px] tracking-[-0.6px]">확률 고지</p>
         <p className="absolute font-['Inter:Regular','Noto_Sans_KR:Regular',sans-serif] font-normal leading-[normal] left-[112px] not-italic text-[#747473] text-[12px] top-[507px] tracking-[-0.6px]">확률 확인</p>

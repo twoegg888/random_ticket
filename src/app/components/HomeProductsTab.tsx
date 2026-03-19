@@ -1,16 +1,13 @@
 import { useState, useEffect } from "react";
 import { projectId, publicAnonKey } from '../../../utils/supabase/info';
 
-type TicketType = 'diamond' | 'gold' | 'platinum' | 'ruby' | 'jewelry' | 'beauty' | 'meat';
+type TicketType = 'diamond' | 'gold' | 'platinum' | 'ruby';
 
 const TICKET_TYPE_NAMES: Record<TicketType, string> = {
-  diamond: '다이아 티켓',
-  gold: '골드 티켓',
-  platinum: '플래티넘 티켓',
-  ruby: '루비 티켓',
-  jewelry: '주얼리 티켓',
-  beauty: '뷰티 티켓',
-  meat: '미트 티켓',
+  diamond: '다이아 박스',
+  gold: '골드 박스',
+  platinum: '플래티넘 박스',
+  ruby: '루비 박스',
 };
 
 interface Product {
@@ -182,9 +179,9 @@ export default function HomeProductsTab({ isAuthenticated }: { isAuthenticated?:
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-6">홈 메인 상품 관리</h1>
       <p className="text-gray-600 mb-4">
-        홈 화면의 "티켓에서 어떤 상품이 나왔을까요?" 섹션에 표시될 상품을 선택하세요.
+        홈 화면의 "박스에서 어떤 상품이 나왔을까요?" 섹션에 표시될 상품을 선택하세요.
         <br />
-        클릭하면 해당 티켓 페이지로 이동합니다.
+        클릭하면 해당 박스 페이지로 이동합니다.
       </p>
 
       {/* 현재 등록된 홈 메인 상품 */}
@@ -231,9 +228,9 @@ export default function HomeProductsTab({ isAuthenticated }: { isAuthenticated?:
       <div className="p-4 bg-blue-50 rounded-lg">
         <h2 className="text-lg font-semibold mb-4">상품 추가</h2>
         
-        {/* 티켓 타입 선택 */}
+        {/* 박스 타입 선택 */}
         <div className="mb-4">
-          <label className="block text-sm font-medium mb-2">티켓 타입 선택</label>
+          <label className="block text-sm font-medium mb-2">박스 타입 선택</label>
           <select
             value={selectedTicketType}
             onChange={(e) => setSelectedTicketType(e.target.value as TicketType)}

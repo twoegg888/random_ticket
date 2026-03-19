@@ -30,6 +30,10 @@ const TICKET_NAME_TO_TYPE: Record<string, keyof typeof TICKET_PRICES> = {
   '다이아 티켓': 'diamond',
   '골드 티켓': 'gold',
   '루비 티켓': 'ruby',
+  '플래티넘 박스': 'platinum',
+  '다이아 박스': 'diamond',
+  '골드 박스': 'gold',
+  '루비 박스': 'ruby',
 };
 
 // 🎲 가중치 기반 랜덤 선택 (확률 합계가 100%일 필요 없음!)
@@ -234,6 +238,10 @@ export default function TicketDetailTemplate({
       '다이아 티켓': 'diamond',
       '골드 티켓': 'gold',
       '루비 티켓': 'ruby',
+      '플래티넘 박스': 'platinum',
+      '다이아 박스': 'diamond',
+      '골드 박스': 'gold',
+      '루비 박스': 'ruby',
     };
     
     // 현재 당첨 상품 저장
@@ -254,7 +262,7 @@ export default function TicketDetailTemplate({
     });
 
     if (!success) {
-      alert('티켓 저장에 실패했습니다. 다시 시도해주세요.');
+      alert('박스 저장에 실패했습니다. 다시 시도해주세요.');
       return;
     }
 
@@ -309,11 +317,11 @@ export default function TicketDetailTemplate({
           <div className="bg-[#f5f5f5] rounded-[17px] p-[24px] mb-[12px]">
             <div className="space-y-[10px]">
               <div>
-                <p className="font-['Inter:Semi_Bold','Noto_Sans_KR:Bold',sans-serif] text-[#020202] text-[12px] mb-[4px]">당첨 티켓</p>
+                <p className="font-['Inter:Semi_Bold','Noto_Sans_KR:Bold',sans-serif] text-[#020202] text-[12px] mb-[4px]">당첨 박스</p>
                 <p className="font-['Inter:Regular','Noto_Sans_KR:Regular',sans-serif] text-[#747473] text-[12px]">뽑기 후 즉시 보관함에서 확인 가능</p>
               </div>
               <div>
-                <p className="font-['Inter:Semi_Bold','Noto_Sans_KR:Bold',sans-serif] text-[#020202] text-[12px] mb-[4px]">실물 티켓</p>
+                <p className="font-['Inter:Semi_Bold','Noto_Sans_KR:Bold',sans-serif] text-[#020202] text-[12px] mb-[4px]">실물 상품</p>
                 <p className="font-['Inter:Regular','Noto_Sans_KR:Regular',sans-serif] text-[#747473] text-[12px]">보관함에서 발송 요청 후 카카오톡으로 수령</p>
               </div>
               <div>
@@ -351,7 +359,7 @@ export default function TicketDetailTemplate({
           <div className="bg-[#eaeaea] h-[7px] -mx-[23px] mb-[32px]" />
           
           {/* 당첨 가능 티켓 */}
-          <h2 className="font-['Pretendard:Bold',sans-serif] text-[#020202] text-[20px] mb-[20px]">당첨 가능 티켓</h2>
+          <h2 className="font-['Pretendard:Bold',sans-serif] text-[#020202] text-[20px] mb-[20px]">당첨 가능 상품</h2>
           
           <div className="space-y-[16px]">
             {loadingProducts ? (
