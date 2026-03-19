@@ -21,7 +21,7 @@ export default function PaymentSuccess() {
   const [searchParams] = useSearchParams();
   const [status, setStatus] = useState<ChargeStatus | "loading">("loading");
   const [error, setError] = useState<string | null>(null);
-  const { refreshUserData } = useApp();
+  const { isInitialized, isLoggedIn, checkLoginStatus, refreshUserData } = useApp();
   const storedPendingCharge = (() => {
     try {
       const raw = localStorage.getItem(PENDING_CHARGE_STORAGE_KEY);
@@ -142,7 +142,10 @@ export default function PaymentSuccess() {
 
         if (nextStatus === "credited") {
           localStorage.removeItem(PENDING_CHARGE_STORAGE_KEY);
-          await refreshUserData();
+          const loggedIn = isLoggedIn || (await checkLoginStatus());
+          if (loggedIn) {
+            await refreshUserData();
+          }
           window.setTimeout(() => {
             navigate("/points", { replace: true });
           }, 1800);
@@ -166,7 +169,10 @@ export default function PaymentSuccess() {
             if (polledStatus === "credited") {
               window.clearInterval(pollTimer);
               localStorage.removeItem(PENDING_CHARGE_STORAGE_KEY);
-              await refreshUserData();
+              const loggedIn = isLoggedIn || (await checkLoginStatus());
+              if (loggedIn) {
+                await refreshUserData();
+              }
               window.setTimeout(() => {
                 navigate("/points", { replace: true });
               }, 1800);
@@ -205,7 +211,18 @@ export default function PaymentSuccess() {
       cancelled = true;
       if (pollTimer) window.clearInterval(pollTimer);
     };
-  }, [cafe24OrderId, internalOrderId, navigate, searchParams]);
+  }, [cafe24OrderId, checkLoginStatus, internalOrderId, isLoggedIn, navigate, refreshUserData, searchParams]);
+
+  if (!isInitialized) {
+    return (
+      <div className="mx-auto flex h-screen w-full max-w-[480px] items-center justify-center bg-white px-6">
+        <div className="text-center">
+          <div className="mx-auto size-8 animate-spin rounded-full border-4 border-gray-300 border-t-black" />
+          <p className="mt-4 text-[14px] text-[#666]">서비스 상태를 불러오는 중입니다.</p>
+        </div>
+      </div>
+    );
+  }
 
   if (error) {
     return (
