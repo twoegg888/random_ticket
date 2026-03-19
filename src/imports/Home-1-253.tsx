@@ -371,10 +371,8 @@ function Group() {
 function Group2() {
   return (
     <div className="absolute contents left-[142px] top-[1999px]">
-      <div className="absolute h-[57px] left-[208px] top-[1999px] w-[62px]" data-name="image 4">
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <img alt="" className="absolute h-[135.85%] left-[-15.52%] max-w-none top-[-15.09%] w-[115.52%]" src={imgImage3} />
-        </div>
+      <div className="absolute left-[200px] top-[1998px] flex h-[32px] w-[132px] items-center justify-center" data-name="image 4">
+        <img alt="Centbox" className="h-full w-full object-contain" src={BRAND_LOGO_URL} />
       </div>
       <div className="-translate-y-1/2 absolute flex flex-col font-['Pretendard:Bold',sans-serif] justify-center leading-[0] left-[142px] not-italic text-[#020202] text-[12px] top-[2073px] tracking-[0.12px] whitespace-nowrap">
         <p className="leading-[normal]">이용약관</p>
