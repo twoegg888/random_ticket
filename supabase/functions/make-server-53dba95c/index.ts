@@ -1200,7 +1200,7 @@ app.post("/make-server-53dba95c/auth/kakao/token", async (c) => {
     const existingUserDataStr = await kv.get(`userdata:${kakaoId}`);
     if (!existingUserDataStr) {
       // 🎁 새 사용자 - 웰컴 포인트 지급!
-      const WELCOME_POINTS = 500000;
+      const WELCOME_POINTS = 3000;
       const initialUserData = {
         userId: `kakao_${kakaoId}`,
         userName: userInfo.nickname,
@@ -1716,7 +1716,7 @@ app.get("/make-server-53dba95c/user/:kakaoId/data", async (c) => {
     
     if (!userDataStr) {
       // 🎁 새 사용자 - 웰컴 포인트 지급!
-      const WELCOME_POINTS = 500000;
+      const WELCOME_POINTS = 3000;
       const initialData = {
         userId: `kakao_${kakaoId}`,
         userName: "사용자",
