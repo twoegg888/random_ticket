@@ -45,8 +45,8 @@ export default function PaymentSuccess() {
     searchParams.get("order_no");
 
   useEffect(() => {
-    if (!internalOrderId) {
-      setError("Missing internal order ID.");
+    if (!internalOrderId && !cafe24OrderId) {
+      setError("Missing internal order ID and Cafe24 order ID.");
       setStatus("failed");
       return;
     }
@@ -102,6 +102,10 @@ export default function PaymentSuccess() {
     };
 
     const fetchChargeStatus = async () => {
+      if (!internalOrderId) {
+        throw new Error("Missing internal order ID for charge status lookup.");
+      }
+
       const response = await fetch(
         `https://${projectId}.supabase.co/functions/v1/make-server-53dba95c/payments/charges/${internalOrderId}`,
         {
@@ -146,6 +150,10 @@ export default function PaymentSuccess() {
         }
 
         let attempts = 0;
+        if (!internalOrderId) {
+          return;
+        }
+
         pollTimer = window.setInterval(async () => {
           attempts += 1;
 
@@ -259,6 +267,9 @@ export default function PaymentSuccess() {
 
         {internalOrderId && (
           <p className="mt-4 text-[12px] text-[#999]">Internal order ID: {internalOrderId}</p>
+        )}
+        {!internalOrderId && cafe24OrderId && (
+          <p className="mt-4 text-[12px] text-[#999]">Cafe24 order ID: {cafe24OrderId}</p>
         )}
 
         <button
