@@ -334,7 +334,7 @@ function Container4() {
 
 function BackgroundHorizontalBorder() {
   return (
-    <div className="-translate-y-1/2 absolute bg-white content-stretch flex h-[64px] items-center justify-center left-0 right-0 top-[calc(50%+1068px)]" data-name="Background+HorizontalBorder">
+    <div className="-translate-y-1/2 absolute bg-white content-stretch flex h-[64px] items-center justify-center left-0 right-0 top-[calc(50%+890px)]" data-name="Background+HorizontalBorder">
       <div aria-hidden="true" className="absolute border-[#eaeaea] border-solid border-t inset-0 pointer-events-none" />
       <Container />
       <Container1 />
@@ -347,7 +347,7 @@ function BackgroundHorizontalBorder() {
 
 function Group1() {
   return (
-    <div className="absolute left-1/2 top-[2088px] h-[28px] w-[116px] -translate-x-1/2">
+    <div className="absolute left-1/2 top-[1775px] h-[28px] w-[116px] -translate-x-1/2">
       <img alt="Centbox" className="h-full w-full object-contain" src={BRAND_LOGO_URL} />
     </div>
   );
@@ -355,7 +355,7 @@ function Group1() {
 
 function Group() {
   return (
-    <div className="absolute contents left-[227px] top-[2102px]">
+    <div className="absolute contents left-[227px] top-[1789px]">
       <Group1 />
     </div>
   );
@@ -363,29 +363,29 @@ function Group() {
 
 function Group2() {
   return (
-    <div className="absolute contents left-[142px] top-[1999px]">
-      <div className="absolute left-[200px] top-[1998px] flex h-[32px] w-[132px] items-center justify-center" data-name="image 4">
+    <div className="absolute contents left-[142px] top-[1686px]">
+      <div className="absolute left-[200px] top-[1685px] flex h-[32px] w-[132px] items-center justify-center" data-name="image 4">
         <img alt="Centbox" className="h-full w-full object-contain" src={BRAND_LOGO_URL} />
       </div>
-      <div className="-translate-y-1/2 absolute flex flex-col font-['Pretendard:Bold',sans-serif] justify-center leading-[0] left-[142px] not-italic text-[#020202] text-[12px] top-[2073px] tracking-[0.12px] whitespace-nowrap">
+      <div className="-translate-y-1/2 absolute flex flex-col font-['Pretendard:Bold',sans-serif] justify-center leading-[0] left-[142px] not-italic text-[#020202] text-[12px] top-[1760px] tracking-[0.12px] whitespace-nowrap">
         <p className="leading-[normal]">이용약관</p>
       </div>
-      <div className="-translate-y-1/2 absolute flex flex-col font-['Pretendard:Regular',sans-serif] justify-center leading-[0] left-[144px] not-italic text-[#020202] text-[12px] top-[2090px] tracking-[0.12px] whitespace-nowrap">
+      <div className="-translate-y-1/2 absolute flex flex-col font-['Pretendard:Regular',sans-serif] justify-center leading-[0] left-[144px] not-italic text-[#020202] text-[12px] top-[1777px] tracking-[0.12px] whitespace-nowrap">
         <p className="leading-[normal]">고객센터</p>
       </div>
-      <a className="-translate-y-1/2 absolute flex flex-col font-['Pretendard:Regular',sans-serif] justify-center leading-[0] left-[188px] not-italic text-[#020202] text-[12px] top-[2090px] whitespace-nowrap" href="mailto:randomticketcs@gmail.com">
+      <a className="-translate-y-1/2 absolute flex flex-col font-['Pretendard:Regular',sans-serif] justify-center leading-[0] left-[188px] not-italic text-[#020202] text-[12px] top-[1777px] whitespace-nowrap" href="mailto:randomticketcs@gmail.com">
         <p className="cursor-pointer leading-[normal]">randomticketcs@gmail.com</p>
       </a>
-      <div className="-translate-y-1/2 absolute flex flex-col font-['Pretendard:Regular',sans-serif] justify-center leading-[0] left-[168px] not-italic text-[#020202] text-[12px] top-[2108px] whitespace-nowrap">
+      <div className="-translate-y-1/2 absolute flex flex-col font-['Pretendard:Regular',sans-serif] justify-center leading-[0] left-[168px] not-italic text-[#020202] text-[12px] top-[1795px] whitespace-nowrap">
         <p className="leading-[normal]">{`사업자 정보 `}</p>
       </div>
-      <div className="-translate-y-1/2 absolute flex flex-col font-['Pretendard:Regular',sans-serif] justify-center leading-[0] left-[239px] not-italic text-[#020202] text-[12px] top-[2108px] tracking-[-0.12px] whitespace-nowrap">
+      <div className="-translate-y-1/2 absolute flex flex-col font-['Pretendard:Regular',sans-serif] justify-center leading-[0] left-[239px] not-italic text-[#020202] text-[12px] top-[1795px] tracking-[-0.12px] whitespace-nowrap">
         <p className="leading-[normal]">Randomticket</p>
       </div>
-      <div className="-translate-y-1/2 absolute flex flex-col font-['Pretendard:Bold',sans-serif] justify-center leading-[0] left-[199px] not-italic text-[#020202] text-[12px] top-[2073px] whitespace-nowrap">
+      <div className="-translate-y-1/2 absolute flex flex-col font-['Pretendard:Bold',sans-serif] justify-center leading-[0] left-[199px] not-italic text-[#020202] text-[12px] top-[1760px] whitespace-nowrap">
         <p className="leading-[normal]">개인정보처리방침</p>
       </div>
-      <div className="-translate-y-1/2 absolute flex flex-col font-['Pretendard:Bold',sans-serif] justify-center leading-[0] left-[297px] not-italic text-[#020202] text-[12px] top-[2073px] whitespace-nowrap">
+      <div className="-translate-y-1/2 absolute flex flex-col font-['Pretendard:Bold',sans-serif] justify-center leading-[0] left-[297px] not-italic text-[#020202] text-[12px] top-[1760px] whitespace-nowrap">
         <p className="leading-[normal]">공지사항</p>
       </div>
       <Group />
@@ -395,8 +395,8 @@ function Group2() {
 
 export default function Home() {
   return (
-    <div className="bg-white relative w-[480px] min-h-[2200px]" data-name="/HOME">
-      <div className="absolute bg-white min-h-[2200px] left-0 top-0 w-[480px]" />
+    <div className="bg-white relative w-[480px] min-h-[1880px]" data-name="/HOME">
+      <div className="absolute bg-white min-h-[1880px] left-0 top-0 w-[480px]" />
       <RouterLink to="/my-page" className="absolute inset-[0.86%_4.72%_98.26%_91.25%] cursor-pointer" data-name="Vector">
         <svg className="absolute block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 19.3333 19.3333">
           <path d={svgPaths.pf0ef200} fill="var(--fill-0, #DDDDDD)" id="Vector" />
