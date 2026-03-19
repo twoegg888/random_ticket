@@ -1,7 +1,6 @@
 import { Link as RouterLink } from "react-router";
 import { useState, useEffect } from "react";
 import svgPaths from "./svg-njoq4gzm16";
-import imgImage3 from "figma:asset/7448817f6bb8739bc4187d6209b1a0c3fb4bcad6.png";
 import img456 from "figma:asset/ae2af3bece6473c99295a2a3b53749f17ada8851.png";
 import img458 from "figma:asset/ad778549c7dce53f4cc581c76265cc1e8d2703f6.png";
 import img470 from "figma:asset/8196bc965d008081e9d4303c0fdf4b5562e07ad1.png";
@@ -12,6 +11,8 @@ import img465 from "figma:asset/87f47f5fa3c15d978aaaec78812512283e478ac1.png";
 import img464 from "figma:asset/647c3c21ac6634534afa7150ab9d6d202fb686b3.png";
 import imgBanner1 from "figma:asset/805896226fd2f028ef2a11adc5383356de68c2b1.png";
 import { projectId, publicAnonKey } from '../../utils/supabase/info';
+
+const BRAND_LOGO_URL = "https://dbase01.cafe24.com/box_logo.png";
 
 // 🔥 관리자가 선택한 메인 상품을 보여주는 ProductShowcase
 function ProductShowcase() {
@@ -353,13 +354,8 @@ function BackgroundHorizontalBorder() {
 
 function Group1() {
   return (
-    <div className="absolute left-[227px] size-[10.7px] top-[2102px]">
-      <svg className="absolute block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 10.7002 10.7002">
-        <g id="Group 2">
-          <path d={svgPaths.p1dad4540} fill="var(--fill-0, #020202)" id="C" />
-          <path d={svgPaths.p12614700} fill="var(--fill-0, black)" id="Rectangle 7 (Stroke)" />
-        </g>
-      </svg>
+    <div className="absolute left-1/2 top-[2088px] h-[28px] w-[116px] -translate-x-1/2">
+      <img alt="Centbox" className="h-full w-full object-contain" src={BRAND_LOGO_URL} />
     </div>
   );
 }
@@ -415,10 +411,8 @@ export default function Home() {
           <path d={svgPaths.pf0ef200} fill="var(--fill-0, #DDDDDD)" id="Vector" />
         </svg>
       </RouterLink>
-      <div className="absolute h-[31px] left-[23px] top-[13px] w-[34px]" data-name="image 3">
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <img alt="" className="absolute h-[135.85%] left-[-15.52%] max-w-none top-[-15.09%] w-[115.52%]" src={imgImage3} />
-        </div>
+      <div className="absolute left-[23px] top-[12px] flex h-[32px] w-[132px] items-center" data-name="brand-logo">
+        <img alt="Centbox" className="h-full w-full object-contain object-left" src={BRAND_LOGO_URL} />
       </div>
       <ProductShowcase />
       <RouterLink to="/ticket/beauty" className="absolute h-[139px] left-[25px] top-[1155px] w-[434px] cursor-pointer z-10" data-name="456">

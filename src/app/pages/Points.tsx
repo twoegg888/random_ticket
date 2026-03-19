@@ -46,7 +46,7 @@ function ChargeModal({
 
       const result = await response.json();
       if (!response.ok || !result.success || !result.checkoutUrl) {
-        throw new Error(result.error || "Failed to create Cafe24 checkout URL.");
+        throw new Error(result.error || "Failed to create checkout URL.");
       }
 
       localStorage.setItem(
@@ -61,7 +61,7 @@ function ChargeModal({
 
       window.location.href = result.checkoutUrl;
     } catch (error) {
-      console.error("Cafe24 charge create error:", error);
+      console.error("Charge create error:", error);
       alert(error instanceof Error ? error.message : "Failed to move to checkout.");
       setIsProcessing(false);
     }
@@ -75,7 +75,7 @@ function ChargeModal({
             포인트 충전
           </h2>
           <p className="font-['Pretendard:Regular',sans-serif] text-[14px] text-[#666]">
-            충전 금액을 선택한 뒤 카페24 결제 페이지로 이동합니다.
+            충전 금액을 선택한 뒤 결제를 진행합니다.
           </p>
         </div>
 
@@ -91,7 +91,7 @@ function ChargeModal({
               결제 안내
             </p>
             <ul className="space-y-[4px] font-['Pretendard:Regular',sans-serif] text-[13px] text-[#999]">
-              <li>선택한 금액으로 Cafe24 결제를 진행합니다.</li>
+              <li>선택한 금액으로 결제를 진행합니다.</li>
               <li>결제 완료 후 서버 검증이 끝나면 포인트가 반영됩니다.</li>
               <li>보너스 포인트는 금액별 정책에 따라 자동 적용됩니다.</li>
             </ul>
@@ -141,7 +141,7 @@ function ChargeModal({
             disabled={!isLoggedIn || isProcessing || !selectedProduct}
             className="h-[52px] w-full rounded-[8px] bg-[#020202] font-['Pretendard:SemiBold',sans-serif] text-[16px] text-white disabled:cursor-not-allowed disabled:bg-[#999]"
           >
-            {isProcessing ? "이동 중..." : "충전 페이지로 이동"}
+            {isProcessing ? "이동 중..." : "결제 진행하기"}
           </button>
           <button
             onClick={onClose}
@@ -370,7 +370,7 @@ export default function Points() {
         <div className="absolute left-[22px] right-[22px] top-[295px] rounded-[12px] bg-[#fafafa] px-[24px] py-[28px] text-left">
           <h2 className="font-['Pretendard:SemiBold',sans-serif] text-[18px] text-[#020202]">포인트 충전 안내</h2>
           <ul className="mt-[12px] space-y-[8px] font-['Pretendard:Regular',sans-serif] text-[14px] text-[#666]">
-            <li>충전 버튼을 누르면 카페24 결제 페이지로 이동합니다.</li>
+            <li>충전 버튼을 누르면 결제 페이지로 이동합니다.</li>
             <li>결제 완료 후 서버 검증이 끝나면 포인트가 자동 반영됩니다.</li>
             <li>보너스 포인트는 결제 금액별 정책에 따라 함께 지급됩니다.</li>
           </ul>
