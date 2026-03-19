@@ -1,11 +1,11 @@
 import { useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router';
 import { useApp } from '../context/AppContext';
-import svgPaths from "../../imports/svg-oofdos0zh0";
 import imgKakao from "figma:asset/152a75c45e952c474894abadfecac91956cd1209.png";
 import imgNaver from "figma:asset/e40d8ef429bc3b8aeece6edec09e51af6b4c17ab.png";
 
 const KAKAO_REST_API_KEY = 'f1f1ee7feb6098a7bc74cd41e7d787cc';
+const BRAND_LOGO_URL = 'https://dbase01.cafe24.com/box_logo.png';
 
 export default function Login() {
   const navigate = useNavigate();
@@ -45,18 +45,13 @@ export default function Login() {
   return (
     <div className="bg-white relative w-[480px] mx-auto h-screen">
       {/* 상단 로고 */}
-      <div className="absolute bg-white h-[56px] left-0 right-0 top-0 flex items-center px-[20px]">
-        <div className="w-[30px] h-[27.84px]">
-          <svg className="size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 30 27.8571">
-            <g clipPath="url(#clip0_22_156)">
-              <path clipRule="evenodd" d={svgPaths.p1ff28800} fill="#FE6555" fillRule="evenodd" />
-            </g>
-            <defs>
-              <clipPath id="clip0_22_156">
-                <rect fill="white" height="27.8571" width="30" />
-              </clipPath>
-            </defs>
-          </svg>
+      <div className="absolute left-0 right-0 top-0 flex h-[64px] items-center px-[20px]">
+        <div className="flex h-[32px] w-[132px] items-center">
+          <img
+            src={BRAND_LOGO_URL}
+            alt="Centbox"
+            className="h-full w-full object-contain object-left"
+          />
         </div>
       </div>
 
