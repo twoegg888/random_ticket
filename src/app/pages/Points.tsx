@@ -142,12 +142,20 @@ function ChargeModal({
 
 export default function Points() {
   const [isChargeOpen, setIsChargeOpen] = useState(false);
-  const { userData, isLoggedIn, refreshUserData } = useApp();
+  const { userData, isLoggedIn, isInitialized, refreshUserData } = useApp();
 
   useEffect(() => {
-    if (!isLoggedIn) return;
+    if (!isInitialized || !isLoggedIn) return;
     void refreshUserData();
-  }, [isLoggedIn, refreshUserData]);
+  }, [isInitialized, isLoggedIn, refreshUserData]);
+
+  if (!isInitialized) {
+    return (
+      <div className="mx-auto flex h-screen w-full max-w-[480px] items-center justify-center bg-[#f7f7f8] px-6">
+        <div className="size-8 animate-spin rounded-full border-4 border-gray-300 border-t-black" />
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto min-h-screen w-full max-w-[480px] bg-[#f7f7f8]">
