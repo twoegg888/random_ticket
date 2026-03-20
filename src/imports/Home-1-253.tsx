@@ -379,9 +379,6 @@ function Group2() {
       <div className="-translate-y-1/2 absolute flex flex-col font-['Pretendard:Regular',sans-serif] justify-center leading-[0] left-[168px] not-italic text-[#020202] text-[12px] top-[1795px] whitespace-nowrap">
         <p className="leading-[normal]">{`사업자 정보 `}</p>
       </div>
-      <div className="-translate-y-1/2 absolute flex flex-col font-['Pretendard:Regular',sans-serif] justify-center leading-[0] left-[239px] not-italic text-[#020202] text-[12px] top-[1795px] tracking-[-0.12px] whitespace-nowrap">
-        <p className="leading-[normal]">Randomticket</p>
-      </div>
       <div className="-translate-y-1/2 absolute flex flex-col font-['Pretendard:Bold',sans-serif] justify-center leading-[0] left-[199px] not-italic text-[#020202] text-[12px] top-[1760px] whitespace-nowrap">
         <p className="leading-[normal]">개인정보처리방침</p>
       </div>
