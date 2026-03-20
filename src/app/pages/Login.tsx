@@ -3,7 +3,6 @@ import { useNavigate, useLocation } from 'react-router';
 import { useApp } from '../context/AppContext';
 import { kakaoRestApiKey } from '../../../utils/supabase/info';
 import imgKakao from "figma:asset/152a75c45e952c474894abadfecac91956cd1209.png";
-import imgNaver from "figma:asset/e40d8ef429bc3b8aeece6edec09e51af6b4c17ab.png";
 const BRAND_LOGO_URL = 'https://dbase01.cafe24.com/box_logo.png';
 
 export default function Login() {
@@ -40,10 +39,6 @@ export default function Login() {
 
     const kakaoAuthUrl = `https://kauth.kakao.com/oauth/authorize?client_id=${kakaoRestApiKey}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code`;
     window.location.href = kakaoAuthUrl;
-  };
-
-  const handleNaverLogin = () => {
-    alert('네이버 로그인은 준비 중입니다.');
   };
 
   return (
@@ -84,21 +79,6 @@ export default function Login() {
           </div>
           <div className="font-['Inter:Semi_Bold','Noto_Sans_KR:Bold',sans-serif] font-semibold text-[15px] text-black leading-[20.8px]">
             카카오 로그인
-          </div>
-          <div className="size-[24px]" />
-        </button>
-
-        {/* 네이버 로그인 버튼 */}
-        <button
-          onClick={handleNaverLogin}
-          className="bg-[#51af35] rounded-[14px] w-full flex items-center justify-between pl-[20px] pr-[20.02px] py-[16px] hover:bg-[#489e2f] transition-colors opacity-50 cursor-not-allowed"
-          disabled
-        >
-          <div className="size-[24px]">
-            <img src={imgNaver} alt="네이버" className="size-full" />
-          </div>
-          <div className="font-['Inter:Semi_Bold','Noto_Sans_KR:Bold',sans-serif] font-semibold text-[15px] text-white leading-[20.8px]">
-            네이버 로그인
           </div>
           <div className="size-[24px]" />
         </button>
