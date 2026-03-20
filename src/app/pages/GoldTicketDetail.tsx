@@ -1,6 +1,7 @@
 import TicketDetailTemplate from "../components/TicketDetailTemplate";
-import imgGold from "figma:asset/fa1f6a548a94aeafe98cb1c1b77f91a89f5ff7ca.png";
+
+const GOLD_DETAIL_IMAGE_URL = "https://dbase01.cafe24.com/Centbox/gold_detail.png";
 
 export default function GoldTicketDetail() {
-  return <TicketDetailTemplate ticketName="골드 박스" mainImage={imgGold} ticketType="gold" />;
+  return <TicketDetailTemplate ticketName="골드 박스" mainImage={GOLD_DETAIL_IMAGE_URL} ticketType="gold" />;
 }

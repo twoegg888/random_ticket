@@ -1,6 +1,7 @@
 import TicketDetailTemplate from "../components/TicketDetailTemplate";
-import imgDiamond from "figma:asset/b7ac3182447c82f15ab3c7bf8b1397aedd985e1c.png";
+
+const DIAMOND_DETAIL_IMAGE_URL = "https://dbase01.cafe24.com/Centbox/diamond_detail.png";
 
 export default function DiamondTicketDetail() {
-  return <TicketDetailTemplate ticketName="다이아 박스" mainImage={imgDiamond} ticketType="diamond" />;
+  return <TicketDetailTemplate ticketName="다이아 박스" mainImage={DIAMOND_DETAIL_IMAGE_URL} ticketType="diamond" />;
 }
