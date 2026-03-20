@@ -1,10 +1,9 @@
 import { useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router';
 import { useApp } from '../context/AppContext';
+import { kakaoRestApiKey } from '../../../utils/supabase/info';
 import imgKakao from "figma:asset/152a75c45e952c474894abadfecac91956cd1209.png";
 import imgNaver from "figma:asset/e40d8ef429bc3b8aeece6edec09e51af6b4c17ab.png";
-
-const KAKAO_REST_API_KEY = 'f1f1ee7feb6098a7bc74cd41e7d787cc';
 const BRAND_LOGO_URL = 'https://dbase01.cafe24.com/box_logo.png';
 
 export default function Login() {
@@ -34,7 +33,12 @@ export default function Login() {
   }
 
   const handleKakaoLogin = () => {
-    const kakaoAuthUrl = `https://kauth.kakao.com/oauth/authorize?client_id=${KAKAO_REST_API_KEY}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code`;
+    if (!kakaoRestApiKey) {
+      alert('카카오 로그인 설정이 누락되었습니다.');
+      return;
+    }
+
+    const kakaoAuthUrl = `https://kauth.kakao.com/oauth/authorize?client_id=${kakaoRestApiKey}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code`;
     window.location.href = kakaoAuthUrl;
   };
 

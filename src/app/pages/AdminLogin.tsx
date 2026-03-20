@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
-import { projectId, publicAnonKey } from '../../../utils/supabase/info';
+import { apiBase, publicAnonKey } from '../../../utils/supabase/info';
 
 export default function AdminLogin() {
   const [password, setPassword] = useState('');
@@ -13,7 +13,7 @@ export default function AdminLogin() {
     const login = async () => {
       try {
         const response = await fetch(
-          `https://${projectId}.supabase.co/functions/v1/make-server-53dba95c/admin/login`,
+          `${apiBase}/admin/login`,
           {
             method: 'POST',
             headers: {
@@ -31,6 +31,7 @@ export default function AdminLogin() {
 
         sessionStorage.setItem('admin_authenticated', 'true');
         sessionStorage.setItem('admin_login_time', Date.now().toString());
+        sessionStorage.setItem('admin_expires_at', String(Date.now() + (result.expiresInMs || 0)));
         sessionStorage.setItem('admin_secret', result.token);
         navigate('/admin');
       } catch (error) {

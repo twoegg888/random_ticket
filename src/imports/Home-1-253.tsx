@@ -6,7 +6,7 @@ import img468 from "figma:asset/6d239e62119a6331f715fe267c8cb5bcf15745d6.png";
 import img467 from "figma:asset/9152485ec268fd3e2f7e4678a722ae075f0bd887.png";
 import img464 from "figma:asset/647c3c21ac6634534afa7150ab9d6d202fb686b3.png";
 import imgBanner1 from "figma:asset/805896226fd2f028ef2a11adc5383356de68c2b1.png";
-import { projectId, publicAnonKey } from '../../utils/supabase/info';
+import { apiBase, publicAnonKey } from '../../utils/supabase/info';
 
 const BRAND_LOGO_URL = "https://dbase01.cafe24.com/box_logo.png";
 
@@ -27,7 +27,7 @@ function ProductShowcase() {
       try {
         // 관리자가 선택한 홈 메인 상품 가져오기
         const response = await fetch(
-          `https://${projectId}.supabase.co/functions/v1/make-server-53dba95c/home-products`,
+          `${apiBase}/home-products`,
           {
             headers: {
               'Authorization': `Bearer ${publicAnonKey}`,

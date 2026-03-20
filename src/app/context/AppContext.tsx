@@ -1,8 +1,8 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { UserData, WinningTicket, Transaction, ExchangeTicket } from '../types';
-import { projectId, publicAnonKey } from '../../../utils/supabase/info';
+import { UserData, WinningTicket, Transaction, ExchangeTicket, TicketType } from '../types';
+import { getApiBase, publicAnonKey } from '../../../utils/supabase/info';
 
-const API_BASE = `https://${projectId}.supabase.co/functions/v1/make-server-53dba95c`;
+const API_BASE = getApiBase();
 const ACCESS_TOKEN_KEY = 'kakao_access_token';
 
 export interface AppContextType {
@@ -20,6 +20,7 @@ export interface AppContextType {
     ticketData: Omit<WinningTicket, 'id' | 'wonAt' | 'status'>;
     points: number;
   }) => Promise<boolean>;
+  drawTickets: (params: { ticketType: TicketType; count: number }) => Promise<WinningTicket[] | null>;
   updateTicket: (ticketId: string, updates: Partial<WinningTicket>) => Promise<void>;
   convertTicketToPoints: (ticketId: string, finalPoints: number, multiplier: number) => Promise<boolean>;
 
@@ -143,7 +144,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         setKakaoAccessToken(token);
         
         try {
-          const response = await fetch(`${API_BASE}/auth/me`, {
+          const response = await fetch(`${API_BASE}/auth/session/me`, {
             headers: {
               'Authorization': `Bearer ${token}`,
             },
@@ -291,6 +292,41 @@ export function AppProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       console.error('Failed to purchase ticket atomically:', error);
       return false;
+    }
+  };
+
+  const drawTickets = async ({
+    ticketType,
+    count,
+  }: {
+    ticketType: TicketType;
+    count: number;
+  }): Promise<WinningTicket[] | null> => {
+    if (!userData.kakaoId) return null;
+
+    try {
+      const response = await fetch(`${API_BASE}/user/${userData.kakaoId}/tickets/draw`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${publicAnonKey}`,
+        },
+        body: JSON.stringify({
+          ticketType,
+          count,
+        }),
+      });
+
+      const result = await response.json();
+      if (!response.ok || !result.success) {
+        return null;
+      }
+
+      await refreshUserData();
+      return result.tickets ?? null;
+    } catch (error) {
+      console.error('Failed to draw tickets:', error);
+      return null;
     }
   };
 
@@ -570,7 +606,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const logout = async () => {
     if (kakaoAccessToken) {
       try {
-        await fetch(`${API_BASE}/auth/logout`, {
+        await fetch(`${API_BASE}/auth/session/logout`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${kakaoAccessToken}`,
@@ -596,7 +632,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
 
     try {
-      const response = await fetch(`${API_BASE}/auth/me`, {
+      const response = await fetch(`${API_BASE}/auth/session/me`, {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
@@ -632,6 +668,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         deductPoints,
         buyTicket,
         purchaseAtomicTicket,
+        drawTickets,
         updateTicket,
         convertTicketToPoints,
         listExchangeTicket,

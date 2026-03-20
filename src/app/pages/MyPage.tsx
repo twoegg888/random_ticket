@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router";
 import { useApp } from "../context/AppContext";
-import { projectId } from '../../../utils/supabase/info';
+import { apiBase } from '../../../utils/supabase/info';
 import { TICKET_GRADES } from '../types';
 
 type TabType = 'profile' | 'transactions' | 'tickets' | 'exchange' | 'luckydraw';
@@ -45,7 +45,7 @@ export default function MyPage() {
     try {
       if (kakaoAccessToken) {
         const response = await fetch(
-          `https://${projectId}.supabase.co/functions/v1/make-server-53dba95c/auth/logout`,
+          `${apiBase}/auth/session/logout`,
           {
             method: 'POST',
             headers: {

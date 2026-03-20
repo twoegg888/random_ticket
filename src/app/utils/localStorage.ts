@@ -249,7 +249,7 @@ export async function checkLoginStatus(): Promise<boolean> {
 
   try {
     const response = await fetch(
-      `https://${projectId}.supabase.co/functions/v1/make-server-53dba95c/auth/me`,
+      `https://${projectId}.supabase.co/functions/v1/make-server-53dba95c/auth/session/me`,
       {
         headers: {
           'Authorization': `Bearer ${accessToken}`,

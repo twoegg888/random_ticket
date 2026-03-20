@@ -8,3 +8,5 @@ Thumbs.db
 .env.*.local
 *.log
 coverage/
+common_F*/
+supabase/.temp/

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { projectId, publicAnonKey } from '../../../utils/supabase/info';
+import { apiBase, projectId, publicAnonKey } from '../../../utils/supabase/info';
 import { Link, useNavigate } from "react-router";
 import ShippingTab from "../components/ShippingTab";
 import HomeProductsTab from "../components/HomeProductsTab";
@@ -10,13 +10,13 @@ type Tab = 'dashboard' | 'users' | 'products' | 'luckydraws' | 'shipping' | 'hom
 type TicketType = 'diamond' | 'gold' | 'platinum' | 'ruby';
 
 const TICKET_TYPE_NAMES: Record<TicketType, string> = {
-  diamond: '다이아 박스',
+  diamond: '?�이??박스',
   gold: '골드 박스',
-  platinum: '플래티넘 박스',
+  platinum: '?�래?�넘 박스',
   ruby: '루비 박스',
 };
 
-// 🔐 관리자 API 호출 헤더 (모든 컴포넌트에서 사용 가능)
+// ?�� 관리자 API ?�출 ?�더 (모든 컴포?�트?�서 ?�용 가??
 const getAuthHeaders = () => {
   const adminSecret = sessionStorage.getItem('admin_secret');
   
@@ -36,25 +36,32 @@ export default function Admin() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isChecking, setIsChecking] = useState(true);
   
-  // 🔥 관리자 인증 체크
+  // ?�� 관리자 ?�증 체크
   useEffect(() => {
     const checkAuth = async () => {
       const authenticated = sessionStorage.getItem('admin_authenticated');
       const loginTime = sessionStorage.getItem('admin_login_time');
+      const expiresAt = sessionStorage.getItem('admin_expires_at');
       const adminSecret = sessionStorage.getItem('admin_secret');
 
       if (!authenticated || authenticated !== 'true') {
         navigate('/admin/login');
         return;
       }
-      
-      if (!adminSecret) {
-        sessionStorage.clear(); // 세션 클리어
+
+      if (expiresAt && Date.now() >= Number(expiresAt)) {
+        sessionStorage.clear();
         navigate('/admin/login');
         return;
       }
       
-      // 세션 유효 시간 체크 (2시간)
+        sessionStorage.clear();
+        navigate('/admin/login');
+        sessionStorage.clear(); // ?�션 ?�리??        navigate('/admin/login');
+        return;
+      }
+      
+        const elapsed = Date.now() - parseInt(loginTime, 10);
       if (loginTime) {
         const elapsed = Date.now() - parseInt(loginTime);
         const twoHours = 2 * 60 * 60 * 1000;
@@ -62,6 +69,7 @@ export default function Admin() {
         if (elapsed > twoHours) {
           sessionStorage.removeItem('admin_authenticated');
           sessionStorage.removeItem('admin_login_time');
+          sessionStorage.removeItem('admin_expires_at');
           sessionStorage.removeItem('admin_secret');
           navigate('/admin/login');
           return;
@@ -72,57 +80,56 @@ export default function Admin() {
       setIsChecking(false);
     };
     
-    checkAuth();
+    void checkAuth();
   }, [navigate]);
   
   const handleLogout = () => {
     sessionStorage.removeItem('admin_authenticated');
     sessionStorage.removeItem('admin_login_time');
+    sessionStorage.removeItem('admin_expires_at');
     sessionStorage.removeItem('admin_secret');
     navigate('/');
   };
   
-  // 인증 체크 중
-  if (isChecking) {
+  // ?�증 체크 �?  if (isChecking) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-gray-300 border-t-black rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600">권한을 확인하는 중...</p>
+          <p className="text-gray-600">권한???�인?�는 �?..</p>
         </div>
       </div>
     );
   }
   
-  // 인증되지 않음
+  // ?�증?��? ?�음
   if (!isAuthenticated) {
     return null;
   }
   
   return (
     <div className="min-h-screen bg-[#f8f9fa]">
-      {/* 헤더 */}
+      {/* ?�더 */}
       <div className="bg-white border-b border-[#e5e7eb] sticky top-0 z-10 shadow-sm">
         <div className="max-w-[1400px] mx-auto px-6">
           <div className="flex justify-between items-center h-[72px]">
             <div className="flex items-center gap-6">
               <Link to="/" className="text-[#6b7280] hover:text-[#111827] transition-colors font-['Pretendard:Medium',sans-serif] text-[14px]">
-                ← 홈으로
-              </Link>
+                ???�으�?              </Link>
               <div className="w-[1px] h-[20px] bg-[#e5e7eb]" />
-              <h1 className="text-[24px] font-['Pretendard:Bold',sans-serif] text-[#111827]">관리자 대시보드</h1>
+              <h1 className="text-[24px] font-['Pretendard:Bold',sans-serif] text-[#111827]">관리자 ?�?�보??/h1>
             </div>
             <button
               onClick={handleLogout}
               className="px-[16px] py-[10px] text-[14px] text-[#6b7280] hover:text-[#ef4444] hover:bg-[#fef2f2] rounded-[8px] font-['Pretendard:Medium',sans-serif] transition-all"
             >
-              로그아웃
+              로그?�웃
             </button>
           </div>
         </div>
       </div>
 
-      {/* 탭 네비게이션 */}
+      {/* ???�비게이??*/}
       <div className="bg-white border-b border-[#e5e7eb]">
         <div className="max-w-[1400px] mx-auto px-6">
           <nav className="flex gap-[32px]">
@@ -134,8 +141,7 @@ export default function Admin() {
                   : 'border-transparent text-[#6b7280] hover:text-[#111827] hover:border-[#d1d5db]'
               }`}
             >
-              📊 대시보드
-            </button>
+              ?�� ?�?�보??            </button>
             <button
               onClick={() => setActiveTab('users')}
               className={`py-[16px] px-[4px] border-b-[3px] font-['Pretendard:SemiBold',sans-serif] text-[15px] transition-all ${
@@ -144,8 +150,7 @@ export default function Admin() {
                   : 'border-transparent text-[#6b7280] hover:text-[#111827] hover:border-[#d1d5db]'
               }`}
             >
-              👥 회원 관리
-            </button>
+              ?�� ?�원 관�?            </button>
             <button
               onClick={() => setActiveTab('products')}
               className={`py-[16px] px-[4px] border-b-[3px] font-['Pretendard:SemiBold',sans-serif] text-[15px] transition-all ${
@@ -154,8 +159,7 @@ export default function Admin() {
                   : 'border-transparent text-[#6b7280] hover:text-[#111827] hover:border-[#d1d5db]'
               }`}
             >
-              🎁 상품 관리
-            </button>
+              ?�� ?�품 관�?            </button>
             <button
               onClick={() => setActiveTab('luckydraws')}
               className={`py-[16px] px-[4px] border-b-[3px] font-['Pretendard:SemiBold',sans-serif] text-[15px] transition-all ${
@@ -164,8 +168,7 @@ export default function Admin() {
                   : 'border-transparent text-[#6b7280] hover:text-[#111827] hover:border-[#d1d5db]'
               }`}
             >
-              🎲 럭키드로우
-            </button>
+              ?�� ??��?�로??            </button>
             <button
               onClick={() => setActiveTab('shipping')}
               className={`py-[16px] px-[4px] border-b-[3px] font-['Pretendard:SemiBold',sans-serif] text-[15px] transition-all ${
@@ -174,8 +177,7 @@ export default function Admin() {
                   : 'border-transparent text-[#6b7280] hover:text-[#111827] hover:border-[#d1d5db]'
               }`}
             >
-              📦 배송 관리
-            </button>
+              ?�� 배송 관�?            </button>
             <button
               onClick={() => setActiveTab('homeproducts')}
               className={`py-[16px] px-[4px] border-b-[3px] font-['Pretendard:SemiBold',sans-serif] text-[15px] transition-all ${
@@ -184,13 +186,13 @@ export default function Admin() {
                   : 'border-transparent text-[#6b7280] hover:text-[#111827] hover:border-[#d1d5db]'
               }`}
             >
-              🏠 홈 메인 상품
+              ?�� ??메인 ?�품
             </button>
           </nav>
         </div>
       </div>
 
-      {/* 탭 컨텐츠 */}
+      {/* ??컨텐�?*/}
       <div className="max-w-[1400px] mx-auto px-6 py-[32px]">
         {activeTab === 'dashboard' && <DashboardTab isAuthenticated={isAuthenticated} />}
         {activeTab === 'users' && <UsersTab isAuthenticated={isAuthenticated} />}
@@ -204,8 +206,7 @@ export default function Admin() {
 }
 
 // ============================================
-// 대시보드 탭
-// ============================================
+// ?�?�보????// ============================================
 function DashboardTab({ isAuthenticated }: { isAuthenticated: boolean }) {
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -219,10 +220,10 @@ function DashboardTab({ isAuthenticated }: { isAuthenticated: boolean }) {
   const fetchStats = async () => {
     try {
       const headers = getAuthHeaders();
-      if (!headers) return; // 🚨 헤더가 null이면 종료
-      console.log('📊 [fetchStats] Calling /admin/stats...');
+      if (!headers) return; // ?�� ?�더가 null?�면 종료
+      console.log('?�� [fetchStats] Calling /admin/stats...');
       const response = await fetch(
-        `https://${projectId}.supabase.co/functions/v1/make-server-53dba95c/admin/stats`,
+        `${apiBase}/admin/stats`,
         {
           method: 'GET',
           headers,
@@ -233,8 +234,8 @@ function DashboardTab({ isAuthenticated }: { isAuthenticated: boolean }) {
       
       if (!response.ok) {
         const data = await response.json();
-        console.error('❌ [fetchStats] Error:', data);
-        alert(`❌ 관리자 권한이 없습니다: ${data.error || response.statusText}`);
+        console.error('??[fetchStats] Error:', data);
+        alert(`??관리자 권한???�습?�다: ${data.error || response.statusText}`);
         return;
       }
       
@@ -248,23 +249,23 @@ function DashboardTab({ isAuthenticated }: { isAuthenticated: boolean }) {
   };
 
   if (loading) {
-    return <div className="text-center py-12">로딩 중...</div>;
+    return <div className="text-center py-12">로딩 �?..</div>;
   }
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-gray-900">전체 통계</h2>
+      <h2 className="text-2xl font-bold text-gray-900">?�체 ?�계</h2>
       
       <div className="flex flex-col gap-5">
         <div className="bg-white overflow-hidden shadow rounded-lg">
           <div className="p-5">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <span className="text-3xl">👥</span>
+                <span className="text-3xl">?��</span>
               </div>
               <div className="ml-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">전체 회원 수</dt>
+                  <dt className="text-sm font-medium text-gray-500 truncate">?�체 ?�원 ??/dt>
                   <dd className="text-3xl font-semibold text-gray-900">{stats?.totalUsers || 0}</dd>
                 </dl>
               </div>
@@ -276,11 +277,11 @@ function DashboardTab({ isAuthenticated }: { isAuthenticated: boolean }) {
           <div className="p-5">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <span className="text-3xl">💰</span>
+                <span className="text-3xl">?��</span>
               </div>
               <div className="ml-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">총 포인트 충전액</dt>
+                  <dt className="text-sm font-medium text-gray-500 truncate">�??�인??충전??/dt>
                   <dd className="text-3xl font-semibold text-gray-900">{(stats?.totalPointsCharged || 0).toLocaleString()}P</dd>
                 </dl>
               </div>
@@ -292,11 +293,11 @@ function DashboardTab({ isAuthenticated }: { isAuthenticated: boolean }) {
           <div className="p-5">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <span className="text-3xl">🎫</span>
+                <span className="text-3xl">?��</span>
               </div>
               <div className="ml-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">박스 판매 수</dt>
+                  <dt className="text-sm font-medium text-gray-500 truncate">박스 ?�매 ??/dt>
                   <dd className="text-3xl font-semibold text-gray-900">{stats?.totalTicketsSold || 0}</dd>
                 </dl>
               </div>
@@ -306,11 +307,11 @@ function DashboardTab({ isAuthenticated }: { isAuthenticated: boolean }) {
       </div>
 
       <div className="bg-white shadow rounded-lg p-6">
-        <h3 className="text-lg font-medium text-gray-900 mb-4">⚠️ 관리자 알림</h3>
+        <h3 className="text-lg font-medium text-gray-900 mb-4">?�️ 관리자 ?�림</h3>
         <div className="space-y-2 text-sm text-gray-600">
-          <p>• 상품 관리 탭에서 박스별 당첨 상품을 추가/수정할 수 있습니다.</p>
-          <p>• 회원 ���리 탭에서 포인트를 직접 충전/차감할 수 있습니다.</p>
-          <p>• 럭키드로우 탭에서 이벤트를 생성하고 당첨자를 선정할 수 있습니다.</p>
+          <p>???�품 관�???��??박스�??�첨 ?�품??추�?/?�정?????�습?�다.</p>
+          <p>???�원 ���리 ??��???�인?��? 직접 충전/차감?????�습?�다.</p>
+          <p>????��?�로????��???�벤?��? ?�성?�고 ?�첨?��? ?�정?????�습?�다.</p>
         </div>
       </div>
     </div>
@@ -318,14 +319,13 @@ function DashboardTab({ isAuthenticated }: { isAuthenticated: boolean }) {
 }
 
 // ============================================
-// 회원 관리 탭
-// ============================================
+// ?�원 관�???// ============================================
 function UsersTab({ isAuthenticated }: { isAuthenticated: boolean }) {
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedUser, setSelectedUser] = useState<any>(null);
   const [pointAmount, setPointAmount] = useState(100000);
-  const [pointDescription, setPointDescription] = useState('관리자 포인트 충전');
+  const [pointDescription, setPointDescription] = useState('관리자 ?�인??충전');
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -336,7 +336,7 @@ function UsersTab({ isAuthenticated }: { isAuthenticated: boolean }) {
   const fetchUsers = async () => {
     try {
       const headers = getAuthHeaders();
-      if (!headers) return; // 🚨 헤더가 null이면 종료
+      if (!headers) return; // ?�� ?�더가 null?�면 종료
       const response = await fetch(
         `https://${projectId}.supabase.co/functions/v1/make-server-53dba95c/admin/users`,
         {
@@ -347,14 +347,14 @@ function UsersTab({ isAuthenticated }: { isAuthenticated: boolean }) {
       
       if (!response.ok) {
         console.error('Admin API error:', data);
-        alert(`❌ 관리자 권한이 없습니다: ${data.error || response.statusText}`);
+        alert(`??관리자 권한???�습?�다: ${data.error || response.statusText}`);
         return;
       }
       
       setUsers(data.users || []);
     } catch (error) {
       console.error('Error fetching users:', error);
-      alert(`❌ 에러: ${error}`);
+      alert(`???�러: ${error}`);
     } finally {
       setLoading(false);
     }
@@ -364,7 +364,7 @@ function UsersTab({ isAuthenticated }: { isAuthenticated: boolean }) {
     try {
       const headers = getAuthHeaders();
       if (!headers) {
-        alert('❌ 인증 정보가 없습니다. 다시 로그인해주세요.');
+        alert('???�증 ?�보가 ?�습?�다. ?�시 로그?�해주세??');
         return;
       }
       
@@ -386,27 +386,27 @@ function UsersTab({ isAuthenticated }: { isAuthenticated: boolean }) {
       const data = await response.json();
 
       if (data.success) {
-        alert(`✅ 성공! 현재 포인트: ${data.points.toLocaleString()}P\n\n💡 팁: 앱에서 포인트가 안 보이면 포인트 페이지 우측 상단의 새로고침 버튼(🔄)을 눌러주세요!`);
-        fetchUsers(); // 목록 새로고침
+        alert(`???�공! ?�재 ?�인?? ${data.points.toLocaleString()}P\n\n?�� ?? ?�에???�인?��? ??보이�??�인???�이지 ?�측 ?�단???�로고침 버튼(?��)???�러주세??`);
+        fetchUsers(); // 목록 ?�로고침
         setSelectedUser(null);
       } else {
-        alert(`❌ 실패: ${data.error}`);
+        alert(`???�패: ${data.error}`);
       }
     } catch (error) {
-      alert(`❌ 에러: ${error}`);
+      alert(`???�러: ${error}`);
     }
   };
 
-  // 🔥 회원 삭제 함수
+  // ?�� ?�원 ??�� ?�수
   const handleDeleteUser = async (kakaoId: string, userName: string) => {
-    if (!confirm(`정말로 "${userName}" (ID: ${kakaoId})의 모든 데이터를 삭제하시겠습니까?\n\n이 작업은 되돌릴 수 없습니다!`)) {
+    if (!confirm(`?�말�?"${userName}" (ID: ${kakaoId})??모든 ?�이?��? ??��?�시겠습?�까?\n\n???�업?� ?�돌�????�습?�다!`)) {
       return;
     }
 
     try {
       const headers = getAuthHeaders();
       if (!headers) {
-        alert('❌ 인증 정보가 없습니다. 다시 로그인해주세요.');
+        alert('???�증 ?�보가 ?�습?�다. ?�시 로그?�해주세??');
         return;
       }
       
@@ -421,24 +421,24 @@ function UsersTab({ isAuthenticated }: { isAuthenticated: boolean }) {
       const data = await response.json();
 
       if (data.success) {
-        alert(`✅ ${userName}의 모든 데이터가 삭제되었습니다.\n\n💡 로그아웃 후 다시 로그인하면 새 계정이 생성됩니다.`);
-        fetchUsers(); // 목록 새로고침
+        alert(`??${userName}??모든 ?�이?��? ??��?�었?�니??\n\n?�� 로그?�웃 ???�시 로그?�하�???계정???�성?�니??`);
+        fetchUsers(); // 목록 ?�로고침
       } else {
-        alert(`❌ 실패: ${data.error}`);
+        alert(`???�패: ${data.error}`);
       }
     } catch (error) {
-      alert(`❌ 에러: ${error}`);
+      alert(`???�러: ${error}`);
     }
   };
 
   if (loading) {
-    return <div className="text-center py-12">로딩 중...</div>;
+    return <div className="text-center py-12">로딩 �?..</div>;
   }
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-gray-900">회원 목록 ({users.length}명)</h2>
+        <h2 className="text-2xl font-bold text-gray-900">?�원 목록 ({users.length}�?</h2>
       </div>
 
       <div className="bg-white shadow overflow-hidden sm:rounded-md">
@@ -454,11 +454,11 @@ function UsersTab({ isAuthenticated }: { isAuthenticated: boolean }) {
                         <span className="text-xs text-gray-500">{user.email}</span>
                       )}
                     </div>
-                    <span className="text-xs text-gray-400">카카오 ID: {user.kakaoId}</span>
+                    <span className="text-xs text-gray-400">카카??ID: {user.kakaoId}</span>
                     <div className="mt-2 flex gap-4 text-sm text-gray-500">
-                      <span>💰 {user.points?.toLocaleString() || 0}P</span>
-                      <span>🎫 당첨 {user.winningTicketsCount || 0}개</span>
-                      <span>📝 거래 {user.transactionsCount || 0}건</span>
+                      <span>?�� {user.points?.toLocaleString() || 0}P</span>
+                      <span>?�� ?�첨 {user.winningTicketsCount || 0}�?/span>
+                      <span>?�� 거래 {user.transactionsCount || 0}�?/span>
                     </div>
                   </div>
                   <div className="flex gap-2">
@@ -466,13 +466,13 @@ function UsersTab({ isAuthenticated }: { isAuthenticated: boolean }) {
                       onClick={() => setSelectedUser(user)}
                       className="ml-4 px-4 py-2 bg-black text-white text-sm rounded hover:bg-gray-800"
                     >
-                      포인트 충전
+                      ?�인??충전
                     </button>
                     <button
                       onClick={() => handleDeleteUser(user.kakaoId, user.userName)}
                       className="px-4 py-2 bg-red-600 text-white text-sm rounded hover:bg-red-700"
                     >
-                      삭제
+                      ??��
                     </button>
                   </div>
                 </div>
@@ -482,11 +482,11 @@ function UsersTab({ isAuthenticated }: { isAuthenticated: boolean }) {
         </ul>
       </div>
 
-      {/* 포인트 충전 모달 */}
+      {/* ?�인??충전 모달 */}
       {selectedUser && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-            <h3 className="text-lg font-bold mb-4">포인트 충전 - {selectedUser.userName}</h3>
+            <h3 className="text-lg font-bold mb-4">?�인??충전 - {selectedUser.userName}</h3>
             
             <div className="space-y-4">
               <div>
@@ -504,14 +504,13 @@ function UsersTab({ isAuthenticated }: { isAuthenticated: boolean }) {
                       onClick={() => setPointAmount(amount)}
                       className="px-3 py-1 text-sm bg-gray-100 rounded hover:bg-gray-200"
                     >
-                      {(amount / 10000).toFixed(0)}만
-                    </button>
+                      {(amount / 10000).toFixed(0)}�?                    </button>
                   ))}
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">설명</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">?�명</label>
                 <input
                   type="text"
                   value={pointDescription}
@@ -531,7 +530,7 @@ function UsersTab({ isAuthenticated }: { isAuthenticated: boolean }) {
                   onClick={() => setSelectedUser(null)}
                   className="flex-1 bg-gray-200 text-gray-800 py-2 rounded hover:bg-gray-300"
                 >
-                  닫기
+                  ?�기
                 </button>
               </div>
             </div>
@@ -543,8 +542,7 @@ function UsersTab({ isAuthenticated }: { isAuthenticated: boolean }) {
 }
 
 // ============================================
-// 상품 관리 탭
-// ============================================
+// ?�품 관�???// ============================================
 function ProductsTab({ isAuthenticated }: { isAuthenticated: boolean }) {
   const [selectedTicketType, setSelectedTicketType] = useState<TicketType>('diamond');
   const [products, setProducts] = useState<any[]>([]);
@@ -564,7 +562,7 @@ function ProductsTab({ isAuthenticated }: { isAuthenticated: boolean }) {
     try {
       const headers = getAuthHeaders();
       if (!headers) {
-        alert('❌ 인증 정보가 없습니다. 다시 로그인해주세요.');
+        alert('???�증 ?�보가 ?�습?�다. ?�시 로그?�해주세??');
         setLoading(false);
         return;
       }
@@ -579,26 +577,26 @@ function ProductsTab({ isAuthenticated }: { isAuthenticated: boolean }) {
       
       if (!response.ok) {
         console.error('Admin API error:', data);
-        alert(`❌ 관리자 권한이 없습니다: ${data.error || response.statusText}`);
+        alert(`??관리자 권한???�습?�다: ${data.error || response.statusText}`);
         return;
       }
       
       setProducts(data.products || []);
     } catch (error) {
       console.error('Error fetching products:', error);
-      alert(`❌ 에러: ${error}`);
+      alert(`???�러: ${error}`);
     } finally {
       setLoading(false);
     }
   };
 
   const handleDeleteProduct = async (productId: string) => {
-    if (!confirm('정말 삭제하시겠습니까?')) return;
+    if (!confirm('?�말 ??��?�시겠습?�까?')) return;
 
     try {
       const headers = getAuthHeaders();
       if (!headers) {
-        alert('❌ 인증 정보가 없습니다. 다시 로그인해주세요.');
+        alert('???�증 ?�보가 ?�습?�다. ?�시 로그?�해주세??');
         return;
       }
       
@@ -611,65 +609,61 @@ function ProductsTab({ isAuthenticated }: { isAuthenticated: boolean }) {
       );
 
       if (response.ok) {
-        alert('✅ 삭제되었습니다.');
+        alert('????��?�었?�니??');
         fetchProducts();
       }
     } catch (error) {
-      alert(`❌ 에러: ${error}`);
+      alert(`???�러: ${error}`);
     }
   };
 
-  // 📥 엑셀 템플릿 다운로드
+  // ?�� ?��? ?�플�??�운로드
   const handleDownloadTemplate = () => {
     const templateData = [
       {
-        '박스타입': 'diamond',
-        '상품명': 'iPhone 15 Pro Max',
-        '브랜드': 'Apple',
-        '포인트': 50000,
+        '박스?�??: 'diamond',
+        '?�품�?: 'iPhone 15 Pro Max',
+        '브랜??: 'Apple',
+        '?�인??: 50000,
         '가중치': 5,
-        '재고': 10,
-        '이미지URL': 'https://images.unsplash.com/photo-1632633728024-e1fd4bef561a',
+        '?�고': 10,
+        '?��?지URL': 'https://images.unsplash.com/photo-1632633728024-e1fd4bef561a',
       },
       {
-        '박스타입': 'gold',
-        '상품명': 'AirPods Pro',
-        '브랜드': 'Apple',
-        '포인트': 15000,
+        '박스?�??: 'gold',
+        '?�품�?: 'AirPods Pro',
+        '브랜??: 'Apple',
+        '?�인??: 15000,
         '가중치': 10,
-        '재고': 50,
-        '이미지URL': 'https://images.unsplash.com/photo-1606841837239-c5a1a4a07af7',
+        '?�고': 50,
+        '?��?지URL': 'https://images.unsplash.com/photo-1606841837239-c5a1a4a07af7',
       },
       {
-        '박스타입': 'ruby',
-        '상품명': 'CU 모바일 상품권 3만원',
-        '브랜드': 'CU',
-        '포인트': 10000,
+        '박스?�??: 'ruby',
+        '?�품�?: 'CU 모바???�품�?3만원',
+        '브랜??: 'CU',
+        '?�인??: 10000,
         '가중치': 15,
-        '재고': 100,
-        '이미지URL': 'https://images.unsplash.com/photo-1542838132-92c53300491e',
+        '?�고': 100,
+        '?��?지URL': 'https://images.unsplash.com/photo-1542838132-92c53300491e',
       },
     ];
 
     const ws = XLSX.utils.json_to_sheet(templateData);
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, '상품목록');
+    XLSX.utils.book_append_sheet(wb, ws, '?�품목록');
     
-    // 열 너비 설정
+    // ???�비 ?�정
     ws['!cols'] = [
-      { wch: 12 }, // 박스타입
-      { wch: 25 }, // 상품명
-      { wch: 15 }, // 브랜드
-      { wch: 10 }, // 포인트
-      { wch: 10 }, // 가중치
-      { wch: 8 },  // 재고
-      { wch: 60 }, // 이미지URL
+      { wch: 12 }, // 박스?�??      { wch: 25 }, // ?�품�?      { wch: 15 }, // 브랜??      { wch: 10 }, // ?�인??      { wch: 10 }, // 가중치
+      { wch: 8 },  // ?�고
+      { wch: 60 }, // ?��?지URL
     ];
 
-    XLSX.writeFile(wb, '상품등록_템플릿.xlsx');
+    XLSX.writeFile(wb, '?�품?�록_?�플�?xlsx');
   };
 
-  // 📤 엑셀 파일 업로드 및 일괄 등록
+  // ?�� ?��? ?�일 ?�로??�??�괄 ?�록
   const handleExcelUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -682,76 +676,74 @@ function ProductsTab({ isAuthenticated }: { isAuthenticated: boolean }) {
       const worksheet = workbook.Sheets[workbook.SheetNames[0]];
       const jsonData = XLSX.utils.sheet_to_json(worksheet);
 
-      console.log('📊 엑셀 데이터:', jsonData);
+      console.log('?�� ?��? ?�이??', jsonData);
 
       if (jsonData.length === 0) {
-        alert('❌ 엑셀 파일에 데이터가 없습니다.');
+        alert('???��? ?�일???�이?��? ?�습?�다.');
         return;
       }
 
-      // 데이터 검증 및 변환
-      const productsToAdd: any[] = [];
+      // ?�이??검�?�?변??      const productsToAdd: any[] = [];
       const errors: string[] = [];
 
       jsonData.forEach((row: any, index: number) => {
-        const rowNum = index + 2; // 엑셀 행 번호 (헤더 포함)
+        const rowNum = index + 2; // ?��? ??번호 (?�더 ?�함)
         
-        // 필수 필드 확인
-        if (!row['박스타입']) {
-          errors.push(`${rowNum}행: 박스타입이 없습니다.`);
+        // ?�수 ?�드 ?�인
+        if (!row['박스?�??]) {
+          errors.push(`${rowNum}?? 박스?�?�이 ?�습?�다.`);
           return;
         }
-        if (!row['상품명']) {
-          errors.push(`${rowNum}행: 상품명이 없습니다.`);
+        if (!row['?�품�?]) {
+          errors.push(`${rowNum}?? ?�품명이 ?�습?�다.`);
           return;
         }
-        if (!row['브랜드']) {
-          errors.push(`${rowNum}행: 브랜드가 없습니다.`);
+        if (!row['브랜??]) {
+          errors.push(`${rowNum}?? 브랜?��? ?�습?�다.`);
           return;
         }
-        if (!row['이미지URL']) {
-          errors.push(`${rowNum}행: 이미지URL이 없습니다.`);
+        if (!row['?��?지URL']) {
+          errors.push(`${rowNum}?? ?��?지URL???�습?�다.`);
           return;
         }
 
-        // 티켓 타입 검증
-        const ticketType = String(row['박스타입']).toLowerCase();
+        // ?�켓 ?�??검�?        const ticketType = String(row['박스?�??]).toLowerCase();
         const validTicketTypes = ['diamond', 'gold', 'platinum', 'ruby'];
         if (!validTicketTypes.includes(ticketType)) {
-          errors.push(`${rowNum}행: 잘못된 박스타입 (${row['박스타입']}). 가능한 값: ${validTicketTypes.join(', ')}`);
+          errors.push(`${rowNum}?? ?�못??박스?�??(${row['박스?�??]}). 가?�한 �? ${validTicketTypes.join(', ')}`);
           return;
         }
 
         productsToAdd.push({
           ticketType,
-          name: String(row['상품명']),
-          brand: String(row['브랜드']),
-          points: Number(row['포인트']) || 1000,
+          name: String(row['?�품�?]),
+          brand: String(row['브랜??]),
+          points: Number(row['?�인??]) || 1000,
           probability: Number(row['가중치']) || 5,
-          stock: Number(row['재고']) || 999,
-          imageUrl: String(row['이미지URL']),
+          stock: Number(row['?�고']) || 999,
+          imageUrl: String(row['?��?지URL']),
         });
       });
 
       if (errors.length > 0) {
-        alert(`❌ 데이터 검증 실패:\n\n${errors.join('\n')}`);
+        alert(`???�이??검�??�패:\n\n${errors.join('\n')}`);
         setUploading(false);
         return;
       }
 
       if (productsToAdd.length === 0) {
-        alert('❌ 등록할 상품이 없습니다.');
+        alert('???�록???�품???�습?�다.');
         setUploading(false);
         return;
       }
 
-      // 일괄 등록 확인
-      if (!confirm(`총 ${productsToAdd.length}개의 상품을 등록하시겠습니까?`)) {
+      // ?�괄 ?�록 ?�인
+      if (!confirm(`�?${productsToAdd.length}개의 ?�품???�록?�시겠습?�까?`)) {
         setUploading(false);
         return;
       }
 
-      // 백엔드 API 호출 (각 상품별로 등록)
+      // 백엔??API ?�출 (�??�품별로 ?�록)
       let successCount = 0;
       let failCount = 0;
       const failedProducts: string[] = [];
@@ -760,7 +752,7 @@ function ProductsTab({ isAuthenticated }: { isAuthenticated: boolean }) {
         try {
           const headers = getAuthHeaders();
           if (!headers) {
-            alert('❌ 인증 정보가 없습니다. 다시 로그인해주세요.');
+            alert('???�증 ?�보가 ?�습?�다. ?�시 로그?�해주세??');
             break;
           }
           
@@ -793,24 +785,23 @@ function ProductsTab({ isAuthenticated }: { isAuthenticated: boolean }) {
           }
         } catch (error) {
           failCount++;
-          failedProducts.push(`${product.name} (네트워크 에러)`);
+          failedProducts.push(`${product.name} (?�트?�크 ?�러)`);
         }
       }
 
-      // 결과 알림
-      let message = `✅ 등록 완료!\n\n성공: ${successCount}개\n실패: ${failCount}개`;
+      // 결과 ?�림
+      let message = `???�록 ?�료!\n\n?�공: ${successCount}�?n?�패: ${failCount}�?;
       if (failedProducts.length > 0) {
-        message += `\n\n실패한 상품:\n${failedProducts.join('\n')}`;
+        message += `\n\n?�패???�품:\n${failedProducts.join('\n')}`;
       }
       alert(message);
 
-      // 목록 새로고침
+      // 목록 ?�로고침
       fetchProducts();
 
-      // 파일 입력 초기화
-      e.target.value = '';
+      // ?�일 ?�력 초기??      e.target.value = '';
     } catch (error) {
-      alert(`❌ 엑셀 파일 처리 중 오류: ${error}`);
+      alert(`???��? ?�일 처리 �??�류: ${error}`);
     } finally {
       setUploading(false);
     }
@@ -819,19 +810,19 @@ function ProductsTab({ isAuthenticated }: { isAuthenticated: boolean }) {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center flex-wrap gap-3">
-        <h2 className="text-2xl font-bold text-gray-900">상품 관리</h2>
+        <h2 className="text-2xl font-bold text-gray-900">?�품 관�?/h2>
         <div className="flex gap-2">
-          {/* 엑셀 템플릿 다운로드 버튼 */}
+          {/* ?��? ?�플�??�운로드 버튼 */}
           <button
             onClick={handleDownloadTemplate}
             className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 text-sm flex items-center gap-2"
           >
-            📥 템플릿 다운로드
+            ?�� ?�플�??�운로드
           </button>
           
-          {/* 엑셀 업로드 버튼 */}
+          {/* ?��? ?�로??버튼 */}
           <label className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm cursor-pointer flex items-center gap-2">
-            {uploading ? '업로드 중...' : '📤 엑셀 일괄등록'}
+            {uploading ? '?�로??�?..' : '?�� ?��? ?�괄?�록'}
             <input
               type="file"
               accept=".xlsx,.xls"
@@ -841,31 +832,31 @@ function ProductsTab({ isAuthenticated }: { isAuthenticated: boolean }) {
             />
           </label>
 
-          {/* 개별 상품 추가 버튼 */}
+          {/* 개별 ?�품 추�? 버튼 */}
           <button
             onClick={() => setShowAddModal(true)}
             className="px-4 py-2 bg-black text-white rounded hover:bg-gray-800"
           >
-            + 상품 추가
+            + ?�품 추�?
           </button>
         </div>
       </div>
 
-      {/* 엑셀 업로드 안내 */}
+      {/* ?��? ?�로???�내 */}
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <h3 className="text-sm font-medium text-blue-900 mb-2">💡 엑셀 일괄 등록 사용 방법</h3>
+        <h3 className="text-sm font-medium text-blue-900 mb-2">?�� ?��? ?�괄 ?�록 ?�용 방법</h3>
         <ol className="text-xs text-blue-700 space-y-1 list-decimal list-inside">
-          <li><strong>템플릿 다운로드</strong> 버튼을 클릭하여 엑셀 템플릿을 다운로드합니다.</li>
-          <li>템플릿에 상품 정보를 입력합니다. (박스타입, 상품명, 브랜드, 포인트, 가중치, 재고, 이미지URL)</li>
-          <li><strong>엑셀 일괄등록</strong> 버튼을 클릭하여 작성한 파일을 업로드합니다.</li>
-          <li>검증 후 일괄 등록됩니다.</li>
+          <li><strong>?�플�??�운로드</strong> 버튼???�릭?�여 ?��? ?�플릿을 ?�운로드?�니??</li>
+          <li>?�플릿에 ?�품 ?�보�??�력?�니?? (박스?�?? ?�품�? 브랜?? ?�인?? 가중치, ?�고, ?��?지URL)</li>
+          <li><strong>?��? ?�괄?�록</strong> 버튼???�릭?�여 ?�성???�일???�로?�합?�다.</li>
+          <li>검�????�괄 ?�록?�니??</li>
         </ol>
         <p className="text-xs text-blue-600 mt-2">
-          ⚠️ 박스타입: diamond, gold, platinum, ruby 중 하나여야 합니다.
+          ?�️ 박스?�?? diamond, gold, platinum, ruby �??�나?�야 ?�니??
         </p>
       </div>
 
-      {/* 박스 타입 선택 */}
+      {/* 박스 ?�???�택 */}
       <div className="flex gap-2 flex-wrap">
         {(Object.keys(TICKET_TYPE_NAMES) as TicketType[]).map((type) => (
           <button
@@ -882,39 +873,39 @@ function ProductsTab({ isAuthenticated }: { isAuthenticated: boolean }) {
         ))}
       </div>
 
-      {/* 상품 목록 */}
+      {/* ?�품 목록 */}
       {loading ? (
-        <div className="text-center py-12">로딩 중...</div>
+        <div className="text-center py-12">로딩 �?..</div>
       ) : products.length === 0 ? (
         <div className="bg-white shadow rounded-lg p-12 text-center">
-          <div className="text-6xl mb-4">📦</div>
-          <h3 className="text-lg font-medium text-gray-900 mb-2">등록된 상품이 없습니다</h3>
+          <div className="text-6xl mb-4">?��</div>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">?�록???�품???�습?�다</h3>
           <p className="text-sm text-gray-500 mb-6">
-            {TICKET_TYPE_NAMES[selectedTicketType]}에 당첨 가능한 상품을 추가해주세요.
+            {TICKET_TYPE_NAMES[selectedTicketType]}???�첨 가?�한 ?�품??추�??�주?�요.
           </p>
           <button
             onClick={() => setShowAddModal(true)}
             className="px-6 py-3 bg-black text-white rounded-lg hover:bg-gray-800 font-medium"
           >
-            첫 상품 등록하기
+            �??�품 ?�록?�기
           </button>
         </div>
       ) : (
         <>
-          {/* 📊 가중치 요약 */}
+          {/* ?�� 가중치 ?�약 */}
           {(() => {
             const activeProducts = products.filter(p => p.isActive);
             const totalWeight = activeProducts.reduce((sum, p) => sum + p.probability, 0);
             return activeProducts.length > 0 && (
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-                <h3 className="text-sm font-medium text-blue-900 mb-2">📊 현재 가중치 설정</h3>
+                <h3 className="text-sm font-medium text-blue-900 mb-2">?�� ?�재 가중치 ?�정</h3>
                 <div className="space-y-1">
                   <p className="text-xs text-blue-700">
-                    • 전체 가중치 합계: <strong>{totalWeight}</strong>
+                    ???�체 가중치 ?�계: <strong>{totalWeight}</strong>
                   </p>
                   {activeProducts.map((p) => (
                     <p key={p.id} className="text-xs text-blue-600">
-                      • {p.name}: {p.probability} ({((p.probability / totalWeight) * 100).toFixed(2)}%)
+                      ??{p.name}: {p.probability} ({((p.probability / totalWeight) * 100).toFixed(2)}%)
                     </p>
                   ))}
                 </div>
@@ -938,9 +929,9 @@ function ProductsTab({ isAuthenticated }: { isAuthenticated: boolean }) {
                         <p className="text-sm font-medium text-gray-900">{product.name}</p>
                         <p className="text-sm text-gray-500">{product.brand}</p>
                         <div className="mt-1 flex gap-3 text-xs text-gray-500">
-                          <span>💰 {product.points.toLocaleString()}P</span>
-                          <span>⚖️ 가중치 {product.probability}</span>
-                          <span>📦 재고 {product.stock}</span>
+                          <span>?�� {product.points.toLocaleString()}P</span>
+                          <span>?�️ 가중치 {product.probability}</span>
+                          <span>?�� ?�고 {product.stock}</span>
                         </div>
                       </div>
                     </div>
@@ -949,13 +940,13 @@ function ProductsTab({ isAuthenticated }: { isAuthenticated: boolean }) {
                         onClick={() => setEditingProduct(product)}
                         className="px-3 py-1 text-sm bg-gray-100 rounded hover:bg-gray-200"
                       >
-                        수정
+                        ?�정
                       </button>
                       <button
                         onClick={() => handleDeleteProduct(product.id)}
                         className="px-3 py-1 text-sm bg-red-100 text-red-700 rounded hover:bg-red-200"
                       >
-                        삭제
+                        ??��
                       </button>
                     </div>
                   </div>
@@ -967,7 +958,7 @@ function ProductsTab({ isAuthenticated }: { isAuthenticated: boolean }) {
         </>
       )}
 
-      {/* 추가/수정 모달 */}
+      {/* 추�?/?�정 모달 */}
       {(showAddModal || editingProduct) && (
         <ProductModal
           ticketType={selectedTicketType}
@@ -983,7 +974,7 @@ function ProductsTab({ isAuthenticated }: { isAuthenticated: boolean }) {
   );
 }
 
-// 상품 추가/수정 모달
+// ?�품 추�?/?�정 모달
 function ProductModal({
   ticketType,
   product,
@@ -1010,20 +1001,20 @@ function ProductModal({
     try {
       const headers = getAuthHeaders();
       if (!headers) {
-        alert('❌ 인증 정보가 없습니다. 다시 로그인해주세요.');
+        alert('???�증 ?�보가 ?�습?�다. ?�시 로그?�해주세??');
         return;
       }
       
-      console.log('🔍 [ProductModal] product:', product);
-      console.log('🔍 [ProductModal] product.id:', product?.id);
-      console.log('🔍 [ProductModal] ticketType:', ticketType);
+      console.log('?�� [ProductModal] product:', product);
+      console.log('?�� [ProductModal] product.id:', product?.id);
+      console.log('?�� [ProductModal] ticketType:', ticketType);
       
       const url = product
         ? `https://${projectId}.supabase.co/functions/v1/make-server-53dba95c/admin/products/${ticketType}/${product.id}`
         : `https://${projectId}.supabase.co/functions/v1/make-server-53dba95c/admin/products/${ticketType}`;
 
-      console.log('🔍 [ProductModal] Request URL:', url);
-      console.log('🔍 [ProductModal] Request method:', product ? 'PUT' : 'POST');
+      console.log('?�� [ProductModal] Request URL:', url);
+      console.log('?�� [ProductModal] Request method:', product ? 'PUT' : 'POST');
 
       const response = await fetch(url, {
         method: product ? 'PUT' : 'POST',
@@ -1035,17 +1026,17 @@ function ProductModal({
       });
 
       const data = await response.json();
-      console.log('🔍 [ProductModal] Response:', data);
+      console.log('?�� [ProductModal] Response:', data);
 
       if (data.success) {
-        alert(`✅ ${product ? '수정' : '추가'}되었습니다.`);
+        alert(`??${product ? '?�정' : '추�?'}?�었?�니??`);
         onSuccess();
         onClose();
       } else {
-        alert(`❌ 실패: ${data.error}`);
+        alert(`???�패: ${data.error}`);
       }
     } catch (error) {
-      alert(`❌ 에러: ${error}`);
+      alert(`???�러: ${error}`);
     }
   };
 
@@ -1053,12 +1044,12 @@ function ProductModal({
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 overflow-y-auto">
       <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 my-8">
         <h3 className="text-lg font-bold mb-4">
-          {product ? '상품 수정' : '상품 추가'} - {TICKET_TYPE_NAMES[ticketType]}
+          {product ? '?�품 ?�정' : '?�품 추�?'} - {TICKET_TYPE_NAMES[ticketType]}
         </h3>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">상품명</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">?�품�?/label>
             <input
               type="text"
               value={formData.name}
@@ -1069,7 +1060,7 @@ function ProductModal({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">브랜드</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">브랜??/label>
             <input
               type="text"
               value={formData.brand}
@@ -1080,7 +1071,7 @@ function ProductModal({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">이미지 URL</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">?��?지 URL</label>
             <input
               type="text"
               value={formData.imageUrl}
@@ -1093,7 +1084,7 @@ function ProductModal({
 
           <div className="grid grid-cols-3 gap-2">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">포인트</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">?�인??/label>
               <input
                 type="number"
                 value={formData.points}
@@ -1105,7 +1096,7 @@ function ProductModal({
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                가중치 (상대적 당첨 확률)
+                가중치 (?��????�첨 ?�률)
               </label>
               <input
                 type="number"
@@ -1116,12 +1107,12 @@ function ProductModal({
                 required
               />
               <p className="text-xs text-gray-500 mt-1">
-                💡 전체 합계가 100일 필요 없습니다. 예: 3, 2, 5 입력 시 → 30%, 20%, 50% 확률
+                ?�� ?�체 ?�계가 100???�요 ?�습?�다. ?? 3, 2, 5 ?�력 ????30%, 20%, 50% ?�률
               </p>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">재고</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">?�고</label>
               <input
                 type="number"
                 value={formData.stock}
@@ -1137,14 +1128,14 @@ function ProductModal({
               type="submit"
               className="flex-1 bg-black text-white py-2 rounded hover:bg-gray-800"
             >
-              {product ? '수정' : '추가'}
+              {product ? '?�정' : '추�?'}
             </button>
             <button
               type="button"
               onClick={onClose}
               className="flex-1 bg-gray-200 text-gray-800 py-2 rounded hover:bg-gray-300"
             >
-              닫기
+              ?�기
             </button>
           </div>
         </form>
@@ -1154,8 +1145,7 @@ function ProductModal({
 }
 
 // ============================================
-// 럭키드로우 탭
-// ============================================
+// ??��?�로????// ============================================
 function LuckyDrawsTab({ isAuthenticated }: { isAuthenticated: boolean }) {
   const [luckyDraws, setLuckyDraws] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -1171,7 +1161,7 @@ function LuckyDrawsTab({ isAuthenticated }: { isAuthenticated: boolean }) {
     try {
       const headers = getAuthHeaders();
       if (!headers) {
-        alert('❌ 인증 정보가 없습니다. 다시 로그인해주세요.');
+        alert('???�증 ?�보가 ?�습?�다. ?�시 로그?�해주세??');
         setLoading(false);
         return;
       }
@@ -1186,26 +1176,26 @@ function LuckyDrawsTab({ isAuthenticated }: { isAuthenticated: boolean }) {
       
       if (!response.ok) {
         console.error('Admin API error:', data);
-        alert(`❌ 관리자 권한이 없습니다: ${data.error || response.statusText}`);
+        alert(`??관리자 권한???�습?�다: ${data.error || response.statusText}`);
         return;
       }
       
       setLuckyDraws(data.luckyDraws || []);
     } catch (error) {
       console.error('Error fetching lucky draws:', error);
-      alert(`❌ 에러: ${error}`);
+      alert(`???�러: ${error}`);
     } finally {
       setLoading(false);
     }
   };
 
   const handleDrawWinner = async (luckyDrawId: string) => {
-    if (!confirm('당첨자를 추첨하시겠습니까?')) return;
+    if (!confirm('?�첨?��? 추첨?�시겠습?�까?')) return;
 
     try {
       const headers = getAuthHeaders();
       if (!headers) {
-        alert('❌ 인증 정보가 없습니다. 다시 로그인해주세요.');
+        alert('???�증 ?�보가 ?�습?�다. ?�시 로그?�해주세??');
         return;
       }
       
@@ -1220,44 +1210,44 @@ function LuckyDrawsTab({ isAuthenticated }: { isAuthenticated: boolean }) {
       const data = await response.json();
 
       if (data.success) {
-        alert(`🎉 당첨자: ${data.winner.userName} (총 ${data.totalParticipants}명 참여)`);
+        alert(`?�� ?�첨?? ${data.winner.userName} (�?${data.totalParticipants}�?참여)`);
         fetchLuckyDraws();
       } else {
-        alert(`❌ 실패: ${data.error}`);
+        alert(`???�패: ${data.error}`);
       }
     } catch (error) {
-      alert(`❌ 에러: ${error}`);
+      alert(`???�러: ${error}`);
     }
   };
 
   if (loading) {
-    return <div className="text-center py-12">로딩 중...</div>;
+    return <div className="text-center py-12">로딩 �?..</div>;
   }
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-gray-900">럭키드로우 관리</h2>
+        <h2 className="text-2xl font-bold text-gray-900">??��?�로??관�?/h2>
         <button
           onClick={() => setShowAddModal(true)}
           className="px-4 py-2 bg-black text-white rounded hover:bg-gray-800"
         >
-          + 럭키드로우 추가
+          + ??��?�로??추�?
         </button>
       </div>
 
       {luckyDraws.length === 0 ? (
         <div className="bg-white shadow rounded-lg p-12 text-center">
-          <div className="text-6xl mb-4">🎲</div>
-          <h3 className="text-lg font-medium text-gray-900 mb-2">등록된 럭키드로우가 없습니다</h3>
+          <div className="text-6xl mb-4">?��</div>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">?�록????��?�로?��? ?�습?�다</h3>
           <p className="text-sm text-gray-500 mb-6">
-            새로운 럭키드로우 이벤트를 추가하여 사용자들에게 응모 기회를 제공하세요.
+            ?�로????��?�로???�벤?��? 추�??�여 ?�용?�들?�게 ?�모 기회�??�공?�세??
           </p>
           <button
             onClick={() => setShowAddModal(true)}
             className="px-6 py-3 bg-black text-white rounded-lg hover:bg-gray-800 font-medium"
           >
-            첫 럭키드로우 추가하기
+            �???��?�로??추�??�기
           </button>
         </div>
       ) : (
@@ -1281,7 +1271,7 @@ function LuckyDrawsTab({ isAuthenticated }: { isAuthenticated: boolean }) {
                   onClick={() => handleDrawWinner(draw.id)}
                   className="flex-1 bg-green-600 text-white py-2 rounded hover:bg-green-700 text-sm"
                 >
-                  🎲 추첨하기
+                  ?�� 추첨?�기
                 </button>
               </div>
             </div>
@@ -1299,7 +1289,7 @@ function LuckyDrawsTab({ isAuthenticated }: { isAuthenticated: boolean }) {
   );
 }
 
-// 럭키드로우 추가 모달
+// ??��?�로??추�? 모달
 function LuckyDrawModal({
   onClose,
   onSuccess,
@@ -1322,7 +1312,7 @@ function LuckyDrawModal({
     try {
       const headers = getAuthHeaders();
       if (!headers) {
-        alert('❌ 인증 정보가 없습니다. 다시 로그인해주세요.');
+        alert('???�증 ?�보가 ?�습?�다. ?�시 로그?�해주세??');
         return;
       }
       
@@ -1341,25 +1331,25 @@ function LuckyDrawModal({
       const data = await response.json();
 
       if (data.success) {
-        alert('✅ 럭키드로우가 추가되었습니다.');
+        alert('????��?�로?��? 추�??�었?�니??');
         onSuccess();
         onClose();
       } else {
-        alert(`❌ 실패: ${data.error}`);
+        alert(`???�패: ${data.error}`);
       }
     } catch (error) {
-      alert(`❌ 에러: ${error}`);
+      alert(`???�러: ${error}`);
     }
   };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-        <h3 className="text-lg font-bold mb-4">럭키드로우 추가</h3>
+        <h3 className="text-lg font-bold mb-4">??��?�로??추�?</h3>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">상품명</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">?�품�?/label>
             <input
               type="text"
               value={formData.name}
@@ -1370,7 +1360,7 @@ function LuckyDrawModal({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">브랜드</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">브랜??/label>
             <input
               type="text"
               value={formData.brand}
@@ -1381,7 +1371,7 @@ function LuckyDrawModal({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">이미지 URL</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">?��?지 URL</label>
             <input
               type="text"
               value={formData.imageUrl}
@@ -1392,7 +1382,7 @@ function LuckyDrawModal({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">참여 포인트</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">참여 ?�인??/label>
             <input
               type="number"
               value={formData.entryPoints}
@@ -1407,14 +1397,14 @@ function LuckyDrawModal({
               type="submit"
               className="flex-1 bg-black text-white py-2 rounded hover:bg-gray-800"
             >
-              추가
+              추�?
             </button>
             <button
               type="button"
               onClick={onClose}
               className="flex-1 bg-gray-200 text-gray-800 py-2 rounded hover:bg-gray-300"
             >
-              닫기
+              ?�기
             </button>
           </div>
         </form>
