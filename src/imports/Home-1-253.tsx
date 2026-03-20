@@ -1,14 +1,62 @@
 import { Link as RouterLink } from "react-router";
 import { useState, useEffect } from "react";
 import svgPaths from "./svg-njoq4gzm16";
-import imgBanner1 from "figma:asset/805896226fd2f028ef2a11adc5383356de68c2b1.png";
 import { apiBase, publicAnonKey } from '../../utils/supabase/info';
 
 const BRAND_LOGO_URL = "https://dbase01.cafe24.com/box_logo.png";
+const HOME_BANNER_IMAGE_URLS = [
+  "https://dbase01.cafe24.com/Centbox/banner1.png",
+  "https://dbase01.cafe24.com/Centbox/banner2.png",
+];
 const PLATINUM_BOX_IMAGE_URL = "https://dbase01.cafe24.com/centbox/pla%20box.png";
 const DIAMOND_BOX_IMAGE_URL = "https://dbase01.cafe24.com/centbox/dia%20box.png";
 const GOLD_BOX_IMAGE_URL = "https://dbase01.cafe24.com/centbox/gold%20box.png";
 const RUBY_BOX_IMAGE_URL = "https://dbase01.cafe24.com/centbox/rubybox.png";
+
+function HomeBannerCarousel() {
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setActiveIndex((prevIndex) => (prevIndex + 1) % HOME_BANNER_IMAGE_URLS.length);
+    }, 3500);
+
+    return () => window.clearInterval(timer);
+  }, []);
+
+  return (
+    <div className="absolute left-[24px] top-[57px] w-[433px]">
+      <div className="relative h-[289px] overflow-hidden rounded-[12px]">
+        <div
+          className="flex h-full w-full transition-transform duration-700 ease-out"
+          style={{ transform: `translateX(-${activeIndex * 100}%)` }}
+        >
+          {HOME_BANNER_IMAGE_URLS.map((imageUrl, index) => (
+            <img
+              key={imageUrl}
+              alt={`메인 배너 ${index + 1}`}
+              className="h-full w-full shrink-0 object-cover"
+              src={imageUrl}
+            />
+          ))}
+        </div>
+      </div>
+      <div className="mt-[16px] flex items-center justify-center gap-[6px]">
+        {HOME_BANNER_IMAGE_URLS.map((imageUrl, index) => (
+          <button
+            key={imageUrl}
+            aria-label={`배너 ${index + 1} 보기`}
+            className={`size-[8px] rounded-full transition-colors ${
+              activeIndex === index ? "bg-[#666666]" : "bg-[#eaeaea]"
+            }`}
+            onClick={() => setActiveIndex(index)}
+            type="button"
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
 
 // 🔥 관리자가 선택한 메인 상품을 보여주는 ProductShowcase
 function ProductShowcase() {
@@ -467,9 +515,7 @@ export default function Home() {
       <div className="-translate-y-1/2 absolute flex flex-col font-['Pretendard:Bold',sans-serif] justify-center leading-[0] left-[26px] not-italic text-[#020202] text-[23px] top-[403.5px] tracking-[0.46px] whitespace-nowrap">
         <p className="leading-[normal]">박스에서 어떤</p>
       </div>
-      <div className="absolute h-[289px] left-[24px] rounded-[12px] top-[57px] w-[433px]" data-name="banner 1">
-        <img alt="" className="absolute inset-0 max-w-none object-cover pointer-events-none rounded-[12px] size-full" src={imgBanner1} />
-      </div>
+      <HomeBannerCarousel />
       <BackgroundHorizontalBorder />
     </div>
   );
