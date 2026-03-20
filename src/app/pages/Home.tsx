@@ -114,7 +114,7 @@ function PolicyDialog({
 
 function HomeFooterOverlay() {
   return (
-    <div className="pointer-events-none absolute inset-x-0 bottom-[36px] flex justify-center">
+    <div className="pointer-events-none absolute inset-x-0 bottom-[108px] flex justify-center">
       <div className="pointer-events-auto relative w-full max-w-[480px]">
         <div className="absolute inset-x-[20px] bottom-0 rounded-[28px] bg-white px-6 pb-6 pt-5 shadow-[0_-12px_30px_rgba(0,0,0,0.08)]">
           <div className="mb-4 flex items-center justify-center gap-4 text-[12px] font-semibold text-[#111111]">
