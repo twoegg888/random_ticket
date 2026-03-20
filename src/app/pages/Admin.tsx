@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { apiBase, projectId, publicAnonKey } from '../../../utils/supabase/info';
+import { projectId, publicAnonKey } from '../../../utils/supabase/info';
 import { Link, useNavigate } from "react-router";
 import ShippingTab from "../components/ShippingTab";
 import HomeProductsTab from "../components/HomeProductsTab";
@@ -10,13 +10,13 @@ type Tab = 'dashboard' | 'users' | 'products' | 'luckydraws' | 'shipping' | 'hom
 type TicketType = 'diamond' | 'gold' | 'platinum' | 'ruby';
 
 const TICKET_TYPE_NAMES: Record<TicketType, string> = {
-  diamond: '?¤ì´??ë°•ìŠ¤',
-  gold: 'ê³¨ë“œ ë°•ìŠ¤',
-  platinum: '?Œë˜?°ë„˜ ë°•ìŠ¤',
-  ruby: 'ë£¨ë¹„ ë°•ìŠ¤',
+  diamond: '´ÙÀÌ¾Æ ¹Ú½º',
+  gold: '°ñµå ¹Ú½º',
+  platinum: 'ÇÃ·¡Æ¼³Ñ ¹Ú½º',
+  ruby: '·çºñ ¹Ú½º',
 };
 
-// ?” ê´€ë¦¬ì API ?¸ì¶œ ?¤ë” (ëª¨ë“  ì»´í¬?ŒíŠ¸?ì„œ ?¬ìš© ê°€??
+// ?? °ü¸®ÀÚ API È£Ãâ Çì´õ (¸ğµç ÄÄÆ÷³ÍÆ®¿¡¼­ »ç¿ë °¡´É)
 const getAuthHeaders = () => {
   const adminSecret = sessionStorage.getItem('admin_secret');
   
@@ -36,32 +36,25 @@ export default function Admin() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isChecking, setIsChecking] = useState(true);
   
-  // ?”¥ ê´€ë¦¬ì ?¸ì¦ ì²´í¬
+  // ?? °ü¸®ÀÚ ÀÎÁõ Ã¼Å©
   useEffect(() => {
     const checkAuth = async () => {
       const authenticated = sessionStorage.getItem('admin_authenticated');
       const loginTime = sessionStorage.getItem('admin_login_time');
-      const expiresAt = sessionStorage.getItem('admin_expires_at');
       const adminSecret = sessionStorage.getItem('admin_secret');
 
       if (!authenticated || authenticated !== 'true') {
         navigate('/admin/login');
         return;
       }
-
-      if (expiresAt && Date.now() >= Number(expiresAt)) {
-        sessionStorage.clear();
+      
+      if (!adminSecret) {
+        sessionStorage.clear(); // ¼¼¼Ç Å¬¸®¾î
         navigate('/admin/login');
         return;
       }
       
-        sessionStorage.clear();
-        navigate('/admin/login');
-        sessionStorage.clear(); // ?¸ì…˜ ?´ë¦¬??        navigate('/admin/login');
-        return;
-      }
-      
-        const elapsed = Date.now() - parseInt(loginTime, 10);
+      // ¼¼¼Ç À¯È¿ ½Ã°£ Ã¼Å© (2½Ã°£)
       if (loginTime) {
         const elapsed = Date.now() - parseInt(loginTime);
         const twoHours = 2 * 60 * 60 * 1000;
@@ -69,7 +62,6 @@ export default function Admin() {
         if (elapsed > twoHours) {
           sessionStorage.removeItem('admin_authenticated');
           sessionStorage.removeItem('admin_login_time');
-          sessionStorage.removeItem('admin_expires_at');
           sessionStorage.removeItem('admin_secret');
           navigate('/admin/login');
           return;
@@ -80,56 +72,57 @@ export default function Admin() {
       setIsChecking(false);
     };
     
-    void checkAuth();
+    checkAuth();
   }, [navigate]);
   
   const handleLogout = () => {
     sessionStorage.removeItem('admin_authenticated');
     sessionStorage.removeItem('admin_login_time');
-    sessionStorage.removeItem('admin_expires_at');
     sessionStorage.removeItem('admin_secret');
     navigate('/');
   };
   
-  // ?¸ì¦ ì²´í¬ ì¤?  if (isChecking) {
+  // ÀÎÁõ Ã¼Å© Áß
+  if (isChecking) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-gray-300 border-t-black rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600">ê¶Œí•œ???•ì¸?˜ëŠ” ì¤?..</p>
+          <p className="text-gray-600">±ÇÇÑÀ» È®ÀÎÇÏ´Â Áß...</p>
         </div>
       </div>
     );
   }
   
-  // ?¸ì¦?˜ì? ?ŠìŒ
+  // ÀÎÁõµÇÁö ¾ÊÀ½
   if (!isAuthenticated) {
     return null;
   }
   
   return (
     <div className="min-h-screen bg-[#f8f9fa]">
-      {/* ?¤ë” */}
+      {/* Çì´õ */}
       <div className="bg-white border-b border-[#e5e7eb] sticky top-0 z-10 shadow-sm">
         <div className="max-w-[1400px] mx-auto px-6">
           <div className="flex justify-between items-center h-[72px]">
             <div className="flex items-center gap-6">
               <Link to="/" className="text-[#6b7280] hover:text-[#111827] transition-colors font-['Pretendard:Medium',sans-serif] text-[14px]">
-                ???ˆìœ¼ë¡?              </Link>
+                ¡ç È¨À¸·Î
+              </Link>
               <div className="w-[1px] h-[20px] bg-[#e5e7eb]" />
-              <h1 className="text-[24px] font-['Pretendard:Bold',sans-serif] text-[#111827]">ê´€ë¦¬ì ?€?œë³´??/h1>
+              <h1 className="text-[24px] font-['Pretendard:Bold',sans-serif] text-[#111827]">°ü¸®ÀÚ ´ë½Ãº¸µå</h1>
             </div>
             <button
               onClick={handleLogout}
               className="px-[16px] py-[10px] text-[14px] text-[#6b7280] hover:text-[#ef4444] hover:bg-[#fef2f2] rounded-[8px] font-['Pretendard:Medium',sans-serif] transition-all"
             >
-              ë¡œê·¸?„ì›ƒ
+              ·Î±×¾Æ¿ô
             </button>
           </div>
         </div>
       </div>
 
-      {/* ???¤ë¹„ê²Œì´??*/}
+      {/* ÅÇ ³×ºñ°ÔÀÌ¼Ç */}
       <div className="bg-white border-b border-[#e5e7eb]">
         <div className="max-w-[1400px] mx-auto px-6">
           <nav className="flex gap-[32px]">
@@ -141,7 +134,8 @@ export default function Admin() {
                   : 'border-transparent text-[#6b7280] hover:text-[#111827] hover:border-[#d1d5db]'
               }`}
             >
-              ?“Š ?€?œë³´??            </button>
+              ?? ´ë½Ãº¸µå
+            </button>
             <button
               onClick={() => setActiveTab('users')}
               className={`py-[16px] px-[4px] border-b-[3px] font-['Pretendard:SemiBold',sans-serif] text-[15px] transition-all ${
@@ -150,7 +144,8 @@ export default function Admin() {
                   : 'border-transparent text-[#6b7280] hover:text-[#111827] hover:border-[#d1d5db]'
               }`}
             >
-              ?‘¥ ?Œì› ê´€ë¦?            </button>
+              ?? È¸¿ø °ü¸®
+            </button>
             <button
               onClick={() => setActiveTab('products')}
               className={`py-[16px] px-[4px] border-b-[3px] font-['Pretendard:SemiBold',sans-serif] text-[15px] transition-all ${
@@ -159,7 +154,8 @@ export default function Admin() {
                   : 'border-transparent text-[#6b7280] hover:text-[#111827] hover:border-[#d1d5db]'
               }`}
             >
-              ? ?í’ˆ ê´€ë¦?            </button>
+              ?? »óÇ° °ü¸®
+            </button>
             <button
               onClick={() => setActiveTab('luckydraws')}
               className={`py-[16px] px-[4px] border-b-[3px] font-['Pretendard:SemiBold',sans-serif] text-[15px] transition-all ${
@@ -168,7 +164,8 @@ export default function Admin() {
                   : 'border-transparent text-[#6b7280] hover:text-[#111827] hover:border-[#d1d5db]'
               }`}
             >
-              ?² ??‚¤?œë¡œ??            </button>
+              ?? ·°Å°µå·Î¿ì
+            </button>
             <button
               onClick={() => setActiveTab('shipping')}
               className={`py-[16px] px-[4px] border-b-[3px] font-['Pretendard:SemiBold',sans-serif] text-[15px] transition-all ${
@@ -177,7 +174,8 @@ export default function Admin() {
                   : 'border-transparent text-[#6b7280] hover:text-[#111827] hover:border-[#d1d5db]'
               }`}
             >
-              ?“¦ ë°°ì†¡ ê´€ë¦?            </button>
+              ?? ¹è¼Û °ü¸®
+            </button>
             <button
               onClick={() => setActiveTab('homeproducts')}
               className={`py-[16px] px-[4px] border-b-[3px] font-['Pretendard:SemiBold',sans-serif] text-[15px] transition-all ${
@@ -186,13 +184,13 @@ export default function Admin() {
                   : 'border-transparent text-[#6b7280] hover:text-[#111827] hover:border-[#d1d5db]'
               }`}
             >
-              ?  ??ë©”ì¸ ?í’ˆ
+              ?? È¨ ¸ŞÀÎ »óÇ°
             </button>
           </nav>
         </div>
       </div>
 
-      {/* ??ì»¨í…ì¸?*/}
+      {/* ÅÇ ÄÁÅÙÃ÷ */}
       <div className="max-w-[1400px] mx-auto px-6 py-[32px]">
         {activeTab === 'dashboard' && <DashboardTab isAuthenticated={isAuthenticated} />}
         {activeTab === 'users' && <UsersTab isAuthenticated={isAuthenticated} />}
@@ -206,7 +204,8 @@ export default function Admin() {
 }
 
 // ============================================
-// ?€?œë³´????// ============================================
+// ´ë½Ãº¸µå ÅÇ
+// ============================================
 function DashboardTab({ isAuthenticated }: { isAuthenticated: boolean }) {
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -220,10 +219,10 @@ function DashboardTab({ isAuthenticated }: { isAuthenticated: boolean }) {
   const fetchStats = async () => {
     try {
       const headers = getAuthHeaders();
-      if (!headers) return; // ?š¨ ?¤ë”ê°€ null?´ë©´ ì¢…ë£Œ
-      console.log('?“Š [fetchStats] Calling /admin/stats...');
+      if (!headers) return; // ?? Çì´õ°¡ nullÀÌ¸é Á¾·á
+      console.log('?? [fetchStats] Calling /admin/stats...');
       const response = await fetch(
-        `${apiBase}/admin/stats`,
+        `https://${projectId}.supabase.co/functions/v1/make-server-53dba95c/admin/stats`,
         {
           method: 'GET',
           headers,
@@ -234,8 +233,8 @@ function DashboardTab({ isAuthenticated }: { isAuthenticated: boolean }) {
       
       if (!response.ok) {
         const data = await response.json();
-        console.error('??[fetchStats] Error:', data);
-        alert(`??ê´€ë¦¬ì ê¶Œí•œ???†ìŠµ?ˆë‹¤: ${data.error || response.statusText}`);
+        console.error('? [fetchStats] Error:', data);
+        alert(`? °ü¸®ÀÚ ±ÇÇÑÀÌ ¾ø½À´Ï´Ù: ${data.error || response.statusText}`);
         return;
       }
       
@@ -249,23 +248,23 @@ function DashboardTab({ isAuthenticated }: { isAuthenticated: boolean }) {
   };
 
   if (loading) {
-    return <div className="text-center py-12">ë¡œë”© ì¤?..</div>;
+    return <div className="text-center py-12">·Îµù Áß...</div>;
   }
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-gray-900">?„ì²´ ?µê³„</h2>
+      <h2 className="text-2xl font-bold text-gray-900">ÀüÃ¼ Åë°è</h2>
       
       <div className="flex flex-col gap-5">
         <div className="bg-white overflow-hidden shadow rounded-lg">
           <div className="p-5">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <span className="text-3xl">?‘¥</span>
+                <span className="text-3xl">??</span>
               </div>
               <div className="ml-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">?„ì²´ ?Œì› ??/dt>
+                  <dt className="text-sm font-medium text-gray-500 truncate">ÀüÃ¼ È¸¿ø ¼ö</dt>
                   <dd className="text-3xl font-semibold text-gray-900">{stats?.totalUsers || 0}</dd>
                 </dl>
               </div>
@@ -277,11 +276,11 @@ function DashboardTab({ isAuthenticated }: { isAuthenticated: boolean }) {
           <div className="p-5">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <span className="text-3xl">?’°</span>
+                <span className="text-3xl">??</span>
               </div>
               <div className="ml-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">ì´??¬ì¸??ì¶©ì „??/dt>
+                  <dt className="text-sm font-medium text-gray-500 truncate">ÃÑ Æ÷ÀÎÆ® ÃæÀü¾×</dt>
                   <dd className="text-3xl font-semibold text-gray-900">{(stats?.totalPointsCharged || 0).toLocaleString()}P</dd>
                 </dl>
               </div>
@@ -293,11 +292,11 @@ function DashboardTab({ isAuthenticated }: { isAuthenticated: boolean }) {
           <div className="p-5">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <span className="text-3xl">?«</span>
+                <span className="text-3xl">??</span>
               </div>
               <div className="ml-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">ë°•ìŠ¤ ?ë§¤ ??/dt>
+                  <dt className="text-sm font-medium text-gray-500 truncate">¹Ú½º ÆÇ¸Å ¼ö</dt>
                   <dd className="text-3xl font-semibold text-gray-900">{stats?.totalTicketsSold || 0}</dd>
                 </dl>
               </div>
@@ -307,11 +306,11 @@ function DashboardTab({ isAuthenticated }: { isAuthenticated: boolean }) {
       </div>
 
       <div className="bg-white shadow rounded-lg p-6">
-        <h3 className="text-lg font-medium text-gray-900 mb-4">? ï¸ ê´€ë¦¬ì ?Œë¦¼</h3>
+        <h3 className="text-lg font-medium text-gray-900 mb-4">?? °ü¸®ÀÚ ¾Ë¸²</h3>
         <div className="space-y-2 text-sm text-gray-600">
-          <p>???í’ˆ ê´€ë¦???—??ë°•ìŠ¤ë³??¹ì²¨ ?í’ˆ??ì¶”ê?/?˜ì •?????ˆìŠµ?ˆë‹¤.</p>
-          <p>???Œì› ï¿½ï¿½ï¿½ë¦¬ ??—???¬ì¸?¸ë? ì§ì ‘ ì¶©ì „/ì°¨ê°?????ˆìŠµ?ˆë‹¤.</p>
-          <p>????‚¤?œë¡œ????—???´ë²¤?¸ë? ?ì„±?˜ê³  ?¹ì²¨?ë? ? ì •?????ˆìŠµ?ˆë‹¤.</p>
+          <p>? »óÇ° °ü¸® ÅÇ¿¡¼­ ¹Ú½ºº° ´çÃ· »óÇ°À» Ãß°¡/¼öÁ¤ÇÒ ¼ö ÀÖ½À´Ï´Ù.</p>
+          <p>? È¸¿ø ???¸® ÅÇ¿¡¼­ Æ÷ÀÎÆ®¸¦ Á÷Á¢ ÃæÀü/Â÷°¨ÇÒ ¼ö ÀÖ½À´Ï´Ù.</p>
+          <p>? ·°Å°µå·Î¿ì ÅÇ¿¡¼­ ÀÌº¥Æ®¸¦ »ı¼ºÇÏ°í ´çÃ·ÀÚ¸¦ ¼±Á¤ÇÒ ¼ö ÀÖ½À´Ï´Ù.</p>
         </div>
       </div>
     </div>
@@ -319,13 +318,14 @@ function DashboardTab({ isAuthenticated }: { isAuthenticated: boolean }) {
 }
 
 // ============================================
-// ?Œì› ê´€ë¦???// ============================================
+// È¸¿ø °ü¸® ÅÇ
+// ============================================
 function UsersTab({ isAuthenticated }: { isAuthenticated: boolean }) {
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedUser, setSelectedUser] = useState<any>(null);
   const [pointAmount, setPointAmount] = useState(100000);
-  const [pointDescription, setPointDescription] = useState('ê´€ë¦¬ì ?¬ì¸??ì¶©ì „');
+  const [pointDescription, setPointDescription] = useState('°ü¸®ÀÚ Æ÷ÀÎÆ® ÃæÀü');
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -336,7 +336,7 @@ function UsersTab({ isAuthenticated }: { isAuthenticated: boolean }) {
   const fetchUsers = async () => {
     try {
       const headers = getAuthHeaders();
-      if (!headers) return; // ?š¨ ?¤ë”ê°€ null?´ë©´ ì¢…ë£Œ
+      if (!headers) return; // ?? Çì´õ°¡ nullÀÌ¸é Á¾·á
       const response = await fetch(
         `https://${projectId}.supabase.co/functions/v1/make-server-53dba95c/admin/users`,
         {
@@ -347,14 +347,14 @@ function UsersTab({ isAuthenticated }: { isAuthenticated: boolean }) {
       
       if (!response.ok) {
         console.error('Admin API error:', data);
-        alert(`??ê´€ë¦¬ì ê¶Œí•œ???†ìŠµ?ˆë‹¤: ${data.error || response.statusText}`);
+        alert(`? °ü¸®ÀÚ ±ÇÇÑÀÌ ¾ø½À´Ï´Ù: ${data.error || response.statusText}`);
         return;
       }
       
       setUsers(data.users || []);
     } catch (error) {
       console.error('Error fetching users:', error);
-      alert(`???ëŸ¬: ${error}`);
+      alert(`? ¿¡·¯: ${error}`);
     } finally {
       setLoading(false);
     }
@@ -364,7 +364,7 @@ function UsersTab({ isAuthenticated }: { isAuthenticated: boolean }) {
     try {
       const headers = getAuthHeaders();
       if (!headers) {
-        alert('???¸ì¦ ?•ë³´ê°€ ?†ìŠµ?ˆë‹¤. ?¤ì‹œ ë¡œê·¸?¸í•´ì£¼ì„¸??');
+        alert('? ÀÎÁõ Á¤º¸°¡ ¾ø½À´Ï´Ù. ´Ù½Ã ·Î±×ÀÎÇØÁÖ¼¼¿ä.');
         return;
       }
       
@@ -386,27 +386,27 @@ function UsersTab({ isAuthenticated }: { isAuthenticated: boolean }) {
       const data = await response.json();
 
       if (data.success) {
-        alert(`???±ê³µ! ?„ì¬ ?¬ì¸?? ${data.points.toLocaleString()}P\n\n?’¡ ?? ?±ì—???¬ì¸?¸ê? ??ë³´ì´ë©??¬ì¸???˜ì´ì§€ ?°ì¸¡ ?ë‹¨???ˆë¡œê³ ì¹¨ ë²„íŠ¼(?”„)???ŒëŸ¬ì£¼ì„¸??`);
-        fetchUsers(); // ëª©ë¡ ?ˆë¡œê³ ì¹¨
+        alert(`? ¼º°ø! ÇöÀç Æ÷ÀÎÆ®: ${data.points.toLocaleString()}P\n\n?? ÆÁ: ¾Û¿¡¼­ Æ÷ÀÎÆ®°¡ ¾È º¸ÀÌ¸é Æ÷ÀÎÆ® ÆäÀÌÁö ¿ìÃø »ó´ÜÀÇ »õ·Î°íÄ§ ¹öÆ°(??)À» ´­·¯ÁÖ¼¼¿ä!`);
+        fetchUsers(); // ¸ñ·Ï »õ·Î°íÄ§
         setSelectedUser(null);
       } else {
-        alert(`???¤íŒ¨: ${data.error}`);
+        alert(`? ½ÇÆĞ: ${data.error}`);
       }
     } catch (error) {
-      alert(`???ëŸ¬: ${error}`);
+      alert(`? ¿¡·¯: ${error}`);
     }
   };
 
-  // ?”¥ ?Œì› ?? œ ?¨ìˆ˜
+  // ?? È¸¿ø »èÁ¦ ÇÔ¼ö
   const handleDeleteUser = async (kakaoId: string, userName: string) => {
-    if (!confirm(`?•ë§ë¡?"${userName}" (ID: ${kakaoId})??ëª¨ë“  ?°ì´?°ë? ?? œ?˜ì‹œê² ìŠµ?ˆê¹Œ?\n\n???‘ì—…?€ ?˜ëŒë¦????†ìŠµ?ˆë‹¤!`)) {
+    if (!confirm(`Á¤¸»·Î "${userName}" (ID: ${kakaoId})ÀÇ ¸ğµç µ¥ÀÌÅÍ¸¦ »èÁ¦ÇÏ½Ã°Ú½À´Ï±î?\n\nÀÌ ÀÛ¾÷Àº µÇµ¹¸± ¼ö ¾ø½À´Ï´Ù!`)) {
       return;
     }
 
     try {
       const headers = getAuthHeaders();
       if (!headers) {
-        alert('???¸ì¦ ?•ë³´ê°€ ?†ìŠµ?ˆë‹¤. ?¤ì‹œ ë¡œê·¸?¸í•´ì£¼ì„¸??');
+        alert('? ÀÎÁõ Á¤º¸°¡ ¾ø½À´Ï´Ù. ´Ù½Ã ·Î±×ÀÎÇØÁÖ¼¼¿ä.');
         return;
       }
       
@@ -421,24 +421,24 @@ function UsersTab({ isAuthenticated }: { isAuthenticated: boolean }) {
       const data = await response.json();
 
       if (data.success) {
-        alert(`??${userName}??ëª¨ë“  ?°ì´?°ê? ?? œ?˜ì—ˆ?µë‹ˆ??\n\n?’¡ ë¡œê·¸?„ì›ƒ ???¤ì‹œ ë¡œê·¸?¸í•˜ë©???ê³„ì •???ì„±?©ë‹ˆ??`);
-        fetchUsers(); // ëª©ë¡ ?ˆë¡œê³ ì¹¨
+        alert(`? ${userName}ÀÇ ¸ğµç µ¥ÀÌÅÍ°¡ »èÁ¦µÇ¾ú½À´Ï´Ù.\n\n?? ·Î±×¾Æ¿ô ÈÄ ´Ù½Ã ·Î±×ÀÎÇÏ¸é »õ °èÁ¤ÀÌ »ı¼ºµË´Ï´Ù.`);
+        fetchUsers(); // ¸ñ·Ï »õ·Î°íÄ§
       } else {
-        alert(`???¤íŒ¨: ${data.error}`);
+        alert(`? ½ÇÆĞ: ${data.error}`);
       }
     } catch (error) {
-      alert(`???ëŸ¬: ${error}`);
+      alert(`? ¿¡·¯: ${error}`);
     }
   };
 
   if (loading) {
-    return <div className="text-center py-12">ë¡œë”© ì¤?..</div>;
+    return <div className="text-center py-12">·Îµù Áß...</div>;
   }
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-gray-900">?Œì› ëª©ë¡ ({users.length}ëª?</h2>
+        <h2 className="text-2xl font-bold text-gray-900">È¸¿ø ¸ñ·Ï ({users.length}¸í)</h2>
       </div>
 
       <div className="bg-white shadow overflow-hidden sm:rounded-md">
@@ -454,11 +454,11 @@ function UsersTab({ isAuthenticated }: { isAuthenticated: boolean }) {
                         <span className="text-xs text-gray-500">{user.email}</span>
                       )}
                     </div>
-                    <span className="text-xs text-gray-400">ì¹´ì¹´??ID: {user.kakaoId}</span>
+                    <span className="text-xs text-gray-400">Ä«Ä«¿À ID: {user.kakaoId}</span>
                     <div className="mt-2 flex gap-4 text-sm text-gray-500">
-                      <span>?’° {user.points?.toLocaleString() || 0}P</span>
-                      <span>?« ?¹ì²¨ {user.winningTicketsCount || 0}ê°?/span>
-                      <span>?“ ê±°ë˜ {user.transactionsCount || 0}ê±?/span>
+                      <span>?? {user.points?.toLocaleString() || 0}P</span>
+                      <span>?? ´çÃ· {user.winningTicketsCount || 0}°³</span>
+                      <span>?? °Å·¡ {user.transactionsCount || 0}°Ç</span>
                     </div>
                   </div>
                   <div className="flex gap-2">
@@ -466,13 +466,13 @@ function UsersTab({ isAuthenticated }: { isAuthenticated: boolean }) {
                       onClick={() => setSelectedUser(user)}
                       className="ml-4 px-4 py-2 bg-black text-white text-sm rounded hover:bg-gray-800"
                     >
-                      ?¬ì¸??ì¶©ì „
+                      Æ÷ÀÎÆ® ÃæÀü
                     </button>
                     <button
                       onClick={() => handleDeleteUser(user.kakaoId, user.userName)}
                       className="px-4 py-2 bg-red-600 text-white text-sm rounded hover:bg-red-700"
                     >
-                      ?? œ
+                      »èÁ¦
                     </button>
                   </div>
                 </div>
@@ -482,15 +482,15 @@ function UsersTab({ isAuthenticated }: { isAuthenticated: boolean }) {
         </ul>
       </div>
 
-      {/* ?¬ì¸??ì¶©ì „ ëª¨ë‹¬ */}
+      {/* Æ÷ÀÎÆ® ÃæÀü ¸ğ´Ş */}
       {selectedUser && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-            <h3 className="text-lg font-bold mb-4">?¬ì¸??ì¶©ì „ - {selectedUser.userName}</h3>
+            <h3 className="text-lg font-bold mb-4">Æ÷ÀÎÆ® ÃæÀü - {selectedUser.userName}</h3>
             
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">ì¶©ì „ ê¸ˆì•¡</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">ÃæÀü ±İ¾×</label>
                 <input
                   type="number"
                   value={pointAmount}
@@ -504,13 +504,14 @@ function UsersTab({ isAuthenticated }: { isAuthenticated: boolean }) {
                       onClick={() => setPointAmount(amount)}
                       className="px-3 py-1 text-sm bg-gray-100 rounded hover:bg-gray-200"
                     >
-                      {(amount / 10000).toFixed(0)}ë§?                    </button>
+                      {(amount / 10000).toFixed(0)}¸¸
+                    </button>
                   ))}
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">?¤ëª…</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">¼³¸í</label>
                 <input
                   type="text"
                   value={pointDescription}
@@ -524,13 +525,13 @@ function UsersTab({ isAuthenticated }: { isAuthenticated: boolean }) {
                   onClick={() => handleAddPoints(selectedUser.kakaoId)}
                   className="flex-1 bg-black text-white py-2 rounded hover:bg-gray-800"
                 >
-                  ì¶©ì „
+                  ÃæÀü
                 </button>
                 <button
                   onClick={() => setSelectedUser(null)}
                   className="flex-1 bg-gray-200 text-gray-800 py-2 rounded hover:bg-gray-300"
                 >
-                  ?«ê¸°
+                  ´İ±â
                 </button>
               </div>
             </div>
@@ -542,7 +543,8 @@ function UsersTab({ isAuthenticated }: { isAuthenticated: boolean }) {
 }
 
 // ============================================
-// ?í’ˆ ê´€ë¦???// ============================================
+// »óÇ° °ü¸® ÅÇ
+// ============================================
 function ProductsTab({ isAuthenticated }: { isAuthenticated: boolean }) {
   const [selectedTicketType, setSelectedTicketType] = useState<TicketType>('diamond');
   const [products, setProducts] = useState<any[]>([]);
@@ -562,7 +564,7 @@ function ProductsTab({ isAuthenticated }: { isAuthenticated: boolean }) {
     try {
       const headers = getAuthHeaders();
       if (!headers) {
-        alert('???¸ì¦ ?•ë³´ê°€ ?†ìŠµ?ˆë‹¤. ?¤ì‹œ ë¡œê·¸?¸í•´ì£¼ì„¸??');
+        alert('? ÀÎÁõ Á¤º¸°¡ ¾ø½À´Ï´Ù. ´Ù½Ã ·Î±×ÀÎÇØÁÖ¼¼¿ä.');
         setLoading(false);
         return;
       }
@@ -577,26 +579,26 @@ function ProductsTab({ isAuthenticated }: { isAuthenticated: boolean }) {
       
       if (!response.ok) {
         console.error('Admin API error:', data);
-        alert(`??ê´€ë¦¬ì ê¶Œí•œ???†ìŠµ?ˆë‹¤: ${data.error || response.statusText}`);
+        alert(`? °ü¸®ÀÚ ±ÇÇÑÀÌ ¾ø½À´Ï´Ù: ${data.error || response.statusText}`);
         return;
       }
       
       setProducts(data.products || []);
     } catch (error) {
       console.error('Error fetching products:', error);
-      alert(`???ëŸ¬: ${error}`);
+      alert(`? ¿¡·¯: ${error}`);
     } finally {
       setLoading(false);
     }
   };
 
   const handleDeleteProduct = async (productId: string) => {
-    if (!confirm('?•ë§ ?? œ?˜ì‹œê² ìŠµ?ˆê¹Œ?')) return;
+    if (!confirm('Á¤¸» »èÁ¦ÇÏ½Ã°Ú½À´Ï±î?')) return;
 
     try {
       const headers = getAuthHeaders();
       if (!headers) {
-        alert('???¸ì¦ ?•ë³´ê°€ ?†ìŠµ?ˆë‹¤. ?¤ì‹œ ë¡œê·¸?¸í•´ì£¼ì„¸??');
+        alert('? ÀÎÁõ Á¤º¸°¡ ¾ø½À´Ï´Ù. ´Ù½Ã ·Î±×ÀÎÇØÁÖ¼¼¿ä.');
         return;
       }
       
@@ -609,61 +611,65 @@ function ProductsTab({ isAuthenticated }: { isAuthenticated: boolean }) {
       );
 
       if (response.ok) {
-        alert('???? œ?˜ì—ˆ?µë‹ˆ??');
+        alert('? »èÁ¦µÇ¾ú½À´Ï´Ù.');
         fetchProducts();
       }
     } catch (error) {
-      alert(`???ëŸ¬: ${error}`);
+      alert(`? ¿¡·¯: ${error}`);
     }
   };
 
-  // ?“¥ ?‘ì? ?œí”Œë¦??¤ìš´ë¡œë“œ
+  // ?? ¿¢¼¿ ÅÛÇÃ¸´ ´Ù¿î·Îµå
   const handleDownloadTemplate = () => {
     const templateData = [
       {
-        'ë°•ìŠ¤?€??: 'diamond',
-        '?í’ˆëª?: 'iPhone 15 Pro Max',
-        'ë¸Œëœ??: 'Apple',
-        '?¬ì¸??: 50000,
-        'ê°€ì¤‘ì¹˜': 5,
-        '?¬ê³ ': 10,
-        '?´ë?ì§€URL': 'https://images.unsplash.com/photo-1632633728024-e1fd4bef561a',
+        '¹Ú½ºÅ¸ÀÔ': 'diamond',
+        '»óÇ°¸í': 'iPhone 15 Pro Max',
+        'ºê·£µå': 'Apple',
+        'Æ÷ÀÎÆ®': 50000,
+        '°¡ÁßÄ¡': 5,
+        'Àç°í': 10,
+        'ÀÌ¹ÌÁöURL': 'https://images.unsplash.com/photo-1632633728024-e1fd4bef561a',
       },
       {
-        'ë°•ìŠ¤?€??: 'gold',
-        '?í’ˆëª?: 'AirPods Pro',
-        'ë¸Œëœ??: 'Apple',
-        '?¬ì¸??: 15000,
-        'ê°€ì¤‘ì¹˜': 10,
-        '?¬ê³ ': 50,
-        '?´ë?ì§€URL': 'https://images.unsplash.com/photo-1606841837239-c5a1a4a07af7',
+        '¹Ú½ºÅ¸ÀÔ': 'gold',
+        '»óÇ°¸í': 'AirPods Pro',
+        'ºê·£µå': 'Apple',
+        'Æ÷ÀÎÆ®': 15000,
+        '°¡ÁßÄ¡': 10,
+        'Àç°í': 50,
+        'ÀÌ¹ÌÁöURL': 'https://images.unsplash.com/photo-1606841837239-c5a1a4a07af7',
       },
       {
-        'ë°•ìŠ¤?€??: 'ruby',
-        '?í’ˆëª?: 'CU ëª¨ë°”???í’ˆê¶?3ë§Œì›',
-        'ë¸Œëœ??: 'CU',
-        '?¬ì¸??: 10000,
-        'ê°€ì¤‘ì¹˜': 15,
-        '?¬ê³ ': 100,
-        '?´ë?ì§€URL': 'https://images.unsplash.com/photo-1542838132-92c53300491e',
+        '¹Ú½ºÅ¸ÀÔ': 'ruby',
+        '»óÇ°¸í': 'CU ¸ğ¹ÙÀÏ »óÇ°±Ç 3¸¸¿ø',
+        'ºê·£µå': 'CU',
+        'Æ÷ÀÎÆ®': 10000,
+        '°¡ÁßÄ¡': 15,
+        'Àç°í': 100,
+        'ÀÌ¹ÌÁöURL': 'https://images.unsplash.com/photo-1542838132-92c53300491e',
       },
     ];
 
     const ws = XLSX.utils.json_to_sheet(templateData);
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, '?í’ˆëª©ë¡');
+    XLSX.utils.book_append_sheet(wb, ws, '»óÇ°¸ñ·Ï');
     
-    // ???ˆë¹„ ?¤ì •
+    // ¿­ ³Êºñ ¼³Á¤
     ws['!cols'] = [
-      { wch: 12 }, // ë°•ìŠ¤?€??      { wch: 25 }, // ?í’ˆëª?      { wch: 15 }, // ë¸Œëœ??      { wch: 10 }, // ?¬ì¸??      { wch: 10 }, // ê°€ì¤‘ì¹˜
-      { wch: 8 },  // ?¬ê³ 
-      { wch: 60 }, // ?´ë?ì§€URL
+      { wch: 12 }, // ¹Ú½ºÅ¸ÀÔ
+      { wch: 25 }, // »óÇ°¸í
+      { wch: 15 }, // ºê·£µå
+      { wch: 10 }, // Æ÷ÀÎÆ®
+      { wch: 10 }, // °¡ÁßÄ¡
+      { wch: 8 },  // Àç°í
+      { wch: 60 }, // ÀÌ¹ÌÁöURL
     ];
 
-    XLSX.writeFile(wb, '?í’ˆ?±ë¡_?œí”Œë¦?xlsx');
+    XLSX.writeFile(wb, '»óÇ°µî·Ï_ÅÛÇÃ¸´.xlsx');
   };
 
-  // ?“¤ ?‘ì? ?Œì¼ ?…ë¡œ??ë°??¼ê´„ ?±ë¡
+  // ?? ¿¢¼¿ ÆÄÀÏ ¾÷·Îµå ¹× ÀÏ°ı µî·Ï
   const handleExcelUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -676,74 +682,76 @@ function ProductsTab({ isAuthenticated }: { isAuthenticated: boolean }) {
       const worksheet = workbook.Sheets[workbook.SheetNames[0]];
       const jsonData = XLSX.utils.sheet_to_json(worksheet);
 
-      console.log('?“Š ?‘ì? ?°ì´??', jsonData);
+      console.log('?? ¿¢¼¿ µ¥ÀÌÅÍ:', jsonData);
 
       if (jsonData.length === 0) {
-        alert('???‘ì? ?Œì¼???°ì´?°ê? ?†ìŠµ?ˆë‹¤.');
+        alert('? ¿¢¼¿ ÆÄÀÏ¿¡ µ¥ÀÌÅÍ°¡ ¾ø½À´Ï´Ù.');
         return;
       }
 
-      // ?°ì´??ê²€ì¦?ë°?ë³€??      const productsToAdd: any[] = [];
+      // µ¥ÀÌÅÍ °ËÁõ ¹× º¯È¯
+      const productsToAdd: any[] = [];
       const errors: string[] = [];
 
       jsonData.forEach((row: any, index: number) => {
-        const rowNum = index + 2; // ?‘ì? ??ë²ˆí˜¸ (?¤ë” ?¬í•¨)
+        const rowNum = index + 2; // ¿¢¼¿ Çà ¹øÈ£ (Çì´õ Æ÷ÇÔ)
         
-        // ?„ìˆ˜ ?„ë“œ ?•ì¸
-        if (!row['ë°•ìŠ¤?€??]) {
-          errors.push(`${rowNum}?? ë°•ìŠ¤?€?…ì´ ?†ìŠµ?ˆë‹¤.`);
+        // ÇÊ¼ö ÇÊµå È®ÀÎ
+        if (!row['¹Ú½ºÅ¸ÀÔ']) {
+          errors.push(`${rowNum}Çà: ¹Ú½ºÅ¸ÀÔÀÌ ¾ø½À´Ï´Ù.`);
           return;
         }
-        if (!row['?í’ˆëª?]) {
-          errors.push(`${rowNum}?? ?í’ˆëª…ì´ ?†ìŠµ?ˆë‹¤.`);
+        if (!row['»óÇ°¸í']) {
+          errors.push(`${rowNum}Çà: »óÇ°¸íÀÌ ¾ø½À´Ï´Ù.`);
           return;
         }
-        if (!row['ë¸Œëœ??]) {
-          errors.push(`${rowNum}?? ë¸Œëœ?œê? ?†ìŠµ?ˆë‹¤.`);
+        if (!row['ºê·£µå']) {
+          errors.push(`${rowNum}Çà: ºê·£µå°¡ ¾ø½À´Ï´Ù.`);
           return;
         }
-        if (!row['?´ë?ì§€URL']) {
-          errors.push(`${rowNum}?? ?´ë?ì§€URL???†ìŠµ?ˆë‹¤.`);
+        if (!row['ÀÌ¹ÌÁöURL']) {
+          errors.push(`${rowNum}Çà: ÀÌ¹ÌÁöURLÀÌ ¾ø½À´Ï´Ù.`);
           return;
         }
 
-        // ?°ì¼“ ?€??ê²€ì¦?        const ticketType = String(row['ë°•ìŠ¤?€??]).toLowerCase();
+        // Æ¼ÄÏ Å¸ÀÔ °ËÁõ
+        const ticketType = String(row['¹Ú½ºÅ¸ÀÔ']).toLowerCase();
         const validTicketTypes = ['diamond', 'gold', 'platinum', 'ruby'];
         if (!validTicketTypes.includes(ticketType)) {
-          errors.push(`${rowNum}?? ?˜ëª»??ë°•ìŠ¤?€??(${row['ë°•ìŠ¤?€??]}). ê°€?¥í•œ ê°? ${validTicketTypes.join(', ')}`);
+          errors.push(`${rowNum}Çà: Àß¸øµÈ ¹Ú½ºÅ¸ÀÔ (${row['¹Ú½ºÅ¸ÀÔ']}). °¡´ÉÇÑ °ª: ${validTicketTypes.join(', ')}`);
           return;
         }
 
         productsToAdd.push({
           ticketType,
-          name: String(row['?í’ˆëª?]),
-          brand: String(row['ë¸Œëœ??]),
-          points: Number(row['?¬ì¸??]) || 1000,
-          probability: Number(row['ê°€ì¤‘ì¹˜']) || 5,
-          stock: Number(row['?¬ê³ ']) || 999,
-          imageUrl: String(row['?´ë?ì§€URL']),
+          name: String(row['»óÇ°¸í']),
+          brand: String(row['ºê·£µå']),
+          points: Number(row['Æ÷ÀÎÆ®']) || 1000,
+          probability: Number(row['°¡ÁßÄ¡']) || 5,
+          stock: Number(row['Àç°í']) || 999,
+          imageUrl: String(row['ÀÌ¹ÌÁöURL']),
         });
       });
 
       if (errors.length > 0) {
-        alert(`???°ì´??ê²€ì¦??¤íŒ¨:\n\n${errors.join('\n')}`);
+        alert(`? µ¥ÀÌÅÍ °ËÁõ ½ÇÆĞ:\n\n${errors.join('\n')}`);
         setUploading(false);
         return;
       }
 
       if (productsToAdd.length === 0) {
-        alert('???±ë¡???í’ˆ???†ìŠµ?ˆë‹¤.');
+        alert('? µî·ÏÇÒ »óÇ°ÀÌ ¾ø½À´Ï´Ù.');
         setUploading(false);
         return;
       }
 
-      // ?¼ê´„ ?±ë¡ ?•ì¸
-      if (!confirm(`ì´?${productsToAdd.length}ê°œì˜ ?í’ˆ???±ë¡?˜ì‹œê² ìŠµ?ˆê¹Œ?`)) {
+      // ÀÏ°ı µî·Ï È®ÀÎ
+      if (!confirm(`ÃÑ ${productsToAdd.length}°³ÀÇ »óÇ°À» µî·ÏÇÏ½Ã°Ú½À´Ï±î?`)) {
         setUploading(false);
         return;
       }
 
-      // ë°±ì—”??API ?¸ì¶œ (ê°??í’ˆë³„ë¡œ ?±ë¡)
+      // ¹é¿£µå API È£Ãâ (°¢ »óÇ°º°·Î µî·Ï)
       let successCount = 0;
       let failCount = 0;
       const failedProducts: string[] = [];
@@ -752,7 +760,7 @@ function ProductsTab({ isAuthenticated }: { isAuthenticated: boolean }) {
         try {
           const headers = getAuthHeaders();
           if (!headers) {
-            alert('???¸ì¦ ?•ë³´ê°€ ?†ìŠµ?ˆë‹¤. ?¤ì‹œ ë¡œê·¸?¸í•´ì£¼ì„¸??');
+            alert('? ÀÎÁõ Á¤º¸°¡ ¾ø½À´Ï´Ù. ´Ù½Ã ·Î±×ÀÎÇØÁÖ¼¼¿ä.');
             break;
           }
           
@@ -785,23 +793,24 @@ function ProductsTab({ isAuthenticated }: { isAuthenticated: boolean }) {
           }
         } catch (error) {
           failCount++;
-          failedProducts.push(`${product.name} (?¤íŠ¸?Œí¬ ?ëŸ¬)`);
+          failedProducts.push(`${product.name} (³×Æ®¿öÅ© ¿¡·¯)`);
         }
       }
 
-      // ê²°ê³¼ ?Œë¦¼
-      let message = `???±ë¡ ?„ë£Œ!\n\n?±ê³µ: ${successCount}ê°?n?¤íŒ¨: ${failCount}ê°?;
+      // °á°ú ¾Ë¸²
+      let message = `? µî·Ï ¿Ï·á!\n\n¼º°ø: ${successCount}°³\n½ÇÆĞ: ${failCount}°³`;
       if (failedProducts.length > 0) {
-        message += `\n\n?¤íŒ¨???í’ˆ:\n${failedProducts.join('\n')}`;
+        message += `\n\n½ÇÆĞÇÑ »óÇ°:\n${failedProducts.join('\n')}`;
       }
       alert(message);
 
-      // ëª©ë¡ ?ˆë¡œê³ ì¹¨
+      // ¸ñ·Ï »õ·Î°íÄ§
       fetchProducts();
 
-      // ?Œì¼ ?…ë ¥ ì´ˆê¸°??      e.target.value = '';
+      // ÆÄÀÏ ÀÔ·Â ÃÊ±âÈ­
+      e.target.value = '';
     } catch (error) {
-      alert(`???‘ì? ?Œì¼ ì²˜ë¦¬ ì¤??¤ë¥˜: ${error}`);
+      alert(`? ¿¢¼¿ ÆÄÀÏ Ã³¸® Áß ¿À·ù: ${error}`);
     } finally {
       setUploading(false);
     }
@@ -810,19 +819,19 @@ function ProductsTab({ isAuthenticated }: { isAuthenticated: boolean }) {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center flex-wrap gap-3">
-        <h2 className="text-2xl font-bold text-gray-900">?í’ˆ ê´€ë¦?/h2>
+        <h2 className="text-2xl font-bold text-gray-900">»óÇ° °ü¸®</h2>
         <div className="flex gap-2">
-          {/* ?‘ì? ?œí”Œë¦??¤ìš´ë¡œë“œ ë²„íŠ¼ */}
+          {/* ¿¢¼¿ ÅÛÇÃ¸´ ´Ù¿î·Îµå ¹öÆ° */}
           <button
             onClick={handleDownloadTemplate}
             className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 text-sm flex items-center gap-2"
           >
-            ?“¥ ?œí”Œë¦??¤ìš´ë¡œë“œ
+            ?? ÅÛÇÃ¸´ ´Ù¿î·Îµå
           </button>
           
-          {/* ?‘ì? ?…ë¡œ??ë²„íŠ¼ */}
+          {/* ¿¢¼¿ ¾÷·Îµå ¹öÆ° */}
           <label className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm cursor-pointer flex items-center gap-2">
-            {uploading ? '?…ë¡œ??ì¤?..' : '?“¤ ?‘ì? ?¼ê´„?±ë¡'}
+            {uploading ? '¾÷·Îµå Áß...' : '?? ¿¢¼¿ ÀÏ°ıµî·Ï'}
             <input
               type="file"
               accept=".xlsx,.xls"
@@ -832,31 +841,31 @@ function ProductsTab({ isAuthenticated }: { isAuthenticated: boolean }) {
             />
           </label>
 
-          {/* ê°œë³„ ?í’ˆ ì¶”ê? ë²„íŠ¼ */}
+          {/* °³º° »óÇ° Ãß°¡ ¹öÆ° */}
           <button
             onClick={() => setShowAddModal(true)}
             className="px-4 py-2 bg-black text-white rounded hover:bg-gray-800"
           >
-            + ?í’ˆ ì¶”ê?
+            + »óÇ° Ãß°¡
           </button>
         </div>
       </div>
 
-      {/* ?‘ì? ?…ë¡œ???ˆë‚´ */}
+      {/* ¿¢¼¿ ¾÷·Îµå ¾È³» */}
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <h3 className="text-sm font-medium text-blue-900 mb-2">?’¡ ?‘ì? ?¼ê´„ ?±ë¡ ?¬ìš© ë°©ë²•</h3>
+        <h3 className="text-sm font-medium text-blue-900 mb-2">?? ¿¢¼¿ ÀÏ°ı µî·Ï »ç¿ë ¹æ¹ı</h3>
         <ol className="text-xs text-blue-700 space-y-1 list-decimal list-inside">
-          <li><strong>?œí”Œë¦??¤ìš´ë¡œë“œ</strong> ë²„íŠ¼???´ë¦­?˜ì—¬ ?‘ì? ?œí”Œë¦¿ì„ ?¤ìš´ë¡œë“œ?©ë‹ˆ??</li>
-          <li>?œí”Œë¦¿ì— ?í’ˆ ?•ë³´ë¥??…ë ¥?©ë‹ˆ?? (ë°•ìŠ¤?€?? ?í’ˆëª? ë¸Œëœ?? ?¬ì¸?? ê°€ì¤‘ì¹˜, ?¬ê³ , ?´ë?ì§€URL)</li>
-          <li><strong>?‘ì? ?¼ê´„?±ë¡</strong> ë²„íŠ¼???´ë¦­?˜ì—¬ ?‘ì„±???Œì¼???…ë¡œ?œí•©?ˆë‹¤.</li>
-          <li>ê²€ì¦????¼ê´„ ?±ë¡?©ë‹ˆ??</li>
+          <li><strong>ÅÛÇÃ¸´ ´Ù¿î·Îµå</strong> ¹öÆ°À» Å¬¸¯ÇÏ¿© ¿¢¼¿ ÅÛÇÃ¸´À» ´Ù¿î·ÎµåÇÕ´Ï´Ù.</li>
+          <li>ÅÛÇÃ¸´¿¡ »óÇ° Á¤º¸¸¦ ÀÔ·ÂÇÕ´Ï´Ù. (¹Ú½ºÅ¸ÀÔ, »óÇ°¸í, ºê·£µå, Æ÷ÀÎÆ®, °¡ÁßÄ¡, Àç°í, ÀÌ¹ÌÁöURL)</li>
+          <li><strong>¿¢¼¿ ÀÏ°ıµî·Ï</strong> ¹öÆ°À» Å¬¸¯ÇÏ¿© ÀÛ¼ºÇÑ ÆÄÀÏÀ» ¾÷·ÎµåÇÕ´Ï´Ù.</li>
+          <li>°ËÁõ ÈÄ ÀÏ°ı µî·ÏµË´Ï´Ù.</li>
         </ol>
         <p className="text-xs text-blue-600 mt-2">
-          ? ï¸ ë°•ìŠ¤?€?? diamond, gold, platinum, ruby ì¤??˜ë‚˜?¬ì•¼ ?©ë‹ˆ??
+          ?? ¹Ú½ºÅ¸ÀÔ: diamond, gold, platinum, ruby Áß ÇÏ³ª¿©¾ß ÇÕ´Ï´Ù.
         </p>
       </div>
 
-      {/* ë°•ìŠ¤ ?€??? íƒ */}
+      {/* ¹Ú½º Å¸ÀÔ ¼±ÅÃ */}
       <div className="flex gap-2 flex-wrap">
         {(Object.keys(TICKET_TYPE_NAMES) as TicketType[]).map((type) => (
           <button
@@ -873,39 +882,39 @@ function ProductsTab({ isAuthenticated }: { isAuthenticated: boolean }) {
         ))}
       </div>
 
-      {/* ?í’ˆ ëª©ë¡ */}
+      {/* »óÇ° ¸ñ·Ï */}
       {loading ? (
-        <div className="text-center py-12">ë¡œë”© ì¤?..</div>
+        <div className="text-center py-12">·Îµù Áß...</div>
       ) : products.length === 0 ? (
         <div className="bg-white shadow rounded-lg p-12 text-center">
-          <div className="text-6xl mb-4">?“¦</div>
-          <h3 className="text-lg font-medium text-gray-900 mb-2">?±ë¡???í’ˆ???†ìŠµ?ˆë‹¤</h3>
+          <div className="text-6xl mb-4">??</div>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">µî·ÏµÈ »óÇ°ÀÌ ¾ø½À´Ï´Ù</h3>
           <p className="text-sm text-gray-500 mb-6">
-            {TICKET_TYPE_NAMES[selectedTicketType]}???¹ì²¨ ê°€?¥í•œ ?í’ˆ??ì¶”ê??´ì£¼?¸ìš”.
+            {TICKET_TYPE_NAMES[selectedTicketType]}¿¡ ´çÃ· °¡´ÉÇÑ »óÇ°À» Ãß°¡ÇØÁÖ¼¼¿ä.
           </p>
           <button
             onClick={() => setShowAddModal(true)}
             className="px-6 py-3 bg-black text-white rounded-lg hover:bg-gray-800 font-medium"
           >
-            ì²??í’ˆ ?±ë¡?˜ê¸°
+            Ã¹ »óÇ° µî·ÏÇÏ±â
           </button>
         </div>
       ) : (
         <>
-          {/* ?“Š ê°€ì¤‘ì¹˜ ?”ì•½ */}
+          {/* ?? °¡ÁßÄ¡ ¿ä¾à */}
           {(() => {
             const activeProducts = products.filter(p => p.isActive);
             const totalWeight = activeProducts.reduce((sum, p) => sum + p.probability, 0);
             return activeProducts.length > 0 && (
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-                <h3 className="text-sm font-medium text-blue-900 mb-2">?“Š ?„ì¬ ê°€ì¤‘ì¹˜ ?¤ì •</h3>
+                <h3 className="text-sm font-medium text-blue-900 mb-2">?? ÇöÀç °¡ÁßÄ¡ ¼³Á¤</h3>
                 <div className="space-y-1">
                   <p className="text-xs text-blue-700">
-                    ???„ì²´ ê°€ì¤‘ì¹˜ ?©ê³„: <strong>{totalWeight}</strong>
+                    ? ÀüÃ¼ °¡ÁßÄ¡ ÇÕ°è: <strong>{totalWeight}</strong>
                   </p>
                   {activeProducts.map((p) => (
                     <p key={p.id} className="text-xs text-blue-600">
-                      ??{p.name}: {p.probability} ({((p.probability / totalWeight) * 100).toFixed(2)}%)
+                      ? {p.name}: {p.probability} ({((p.probability / totalWeight) * 100).toFixed(2)}%)
                     </p>
                   ))}
                 </div>
@@ -929,9 +938,9 @@ function ProductsTab({ isAuthenticated }: { isAuthenticated: boolean }) {
                         <p className="text-sm font-medium text-gray-900">{product.name}</p>
                         <p className="text-sm text-gray-500">{product.brand}</p>
                         <div className="mt-1 flex gap-3 text-xs text-gray-500">
-                          <span>?’° {product.points.toLocaleString()}P</span>
-                          <span>?–ï¸ ê°€ì¤‘ì¹˜ {product.probability}</span>
-                          <span>?“¦ ?¬ê³  {product.stock}</span>
+                          <span>?? {product.points.toLocaleString()}P</span>
+                          <span>?? °¡ÁßÄ¡ {product.probability}</span>
+                          <span>?? Àç°í {product.stock}</span>
                         </div>
                       </div>
                     </div>
@@ -940,13 +949,13 @@ function ProductsTab({ isAuthenticated }: { isAuthenticated: boolean }) {
                         onClick={() => setEditingProduct(product)}
                         className="px-3 py-1 text-sm bg-gray-100 rounded hover:bg-gray-200"
                       >
-                        ?˜ì •
+                        ¼öÁ¤
                       </button>
                       <button
                         onClick={() => handleDeleteProduct(product.id)}
                         className="px-3 py-1 text-sm bg-red-100 text-red-700 rounded hover:bg-red-200"
                       >
-                        ?? œ
+                        »èÁ¦
                       </button>
                     </div>
                   </div>
@@ -958,7 +967,7 @@ function ProductsTab({ isAuthenticated }: { isAuthenticated: boolean }) {
         </>
       )}
 
-      {/* ì¶”ê?/?˜ì • ëª¨ë‹¬ */}
+      {/* Ãß°¡/¼öÁ¤ ¸ğ´Ş */}
       {(showAddModal || editingProduct) && (
         <ProductModal
           ticketType={selectedTicketType}
@@ -974,7 +983,7 @@ function ProductsTab({ isAuthenticated }: { isAuthenticated: boolean }) {
   );
 }
 
-// ?í’ˆ ì¶”ê?/?˜ì • ëª¨ë‹¬
+// »óÇ° Ãß°¡/¼öÁ¤ ¸ğ´Ş
 function ProductModal({
   ticketType,
   product,
@@ -1001,20 +1010,20 @@ function ProductModal({
     try {
       const headers = getAuthHeaders();
       if (!headers) {
-        alert('???¸ì¦ ?•ë³´ê°€ ?†ìŠµ?ˆë‹¤. ?¤ì‹œ ë¡œê·¸?¸í•´ì£¼ì„¸??');
+        alert('? ÀÎÁõ Á¤º¸°¡ ¾ø½À´Ï´Ù. ´Ù½Ã ·Î±×ÀÎÇØÁÖ¼¼¿ä.');
         return;
       }
       
-      console.log('?” [ProductModal] product:', product);
-      console.log('?” [ProductModal] product.id:', product?.id);
-      console.log('?” [ProductModal] ticketType:', ticketType);
+      console.log('?? [ProductModal] product:', product);
+      console.log('?? [ProductModal] product.id:', product?.id);
+      console.log('?? [ProductModal] ticketType:', ticketType);
       
       const url = product
         ? `https://${projectId}.supabase.co/functions/v1/make-server-53dba95c/admin/products/${ticketType}/${product.id}`
         : `https://${projectId}.supabase.co/functions/v1/make-server-53dba95c/admin/products/${ticketType}`;
 
-      console.log('?” [ProductModal] Request URL:', url);
-      console.log('?” [ProductModal] Request method:', product ? 'PUT' : 'POST');
+      console.log('?? [ProductModal] Request URL:', url);
+      console.log('?? [ProductModal] Request method:', product ? 'PUT' : 'POST');
 
       const response = await fetch(url, {
         method: product ? 'PUT' : 'POST',
@@ -1026,17 +1035,17 @@ function ProductModal({
       });
 
       const data = await response.json();
-      console.log('?” [ProductModal] Response:', data);
+      console.log('?? [ProductModal] Response:', data);
 
       if (data.success) {
-        alert(`??${product ? '?˜ì •' : 'ì¶”ê?'}?˜ì—ˆ?µë‹ˆ??`);
+        alert(`? ${product ? '¼öÁ¤' : 'Ãß°¡'}µÇ¾ú½À´Ï´Ù.`);
         onSuccess();
         onClose();
       } else {
-        alert(`???¤íŒ¨: ${data.error}`);
+        alert(`? ½ÇÆĞ: ${data.error}`);
       }
     } catch (error) {
-      alert(`???ëŸ¬: ${error}`);
+      alert(`? ¿¡·¯: ${error}`);
     }
   };
 
@@ -1044,12 +1053,12 @@ function ProductModal({
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 overflow-y-auto">
       <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 my-8">
         <h3 className="text-lg font-bold mb-4">
-          {product ? '?í’ˆ ?˜ì •' : '?í’ˆ ì¶”ê?'} - {TICKET_TYPE_NAMES[ticketType]}
+          {product ? '»óÇ° ¼öÁ¤' : '»óÇ° Ãß°¡'} - {TICKET_TYPE_NAMES[ticketType]}
         </h3>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">?í’ˆëª?/label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">»óÇ°¸í</label>
             <input
               type="text"
               value={formData.name}
@@ -1060,7 +1069,7 @@ function ProductModal({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">ë¸Œëœ??/label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">ºê·£µå</label>
             <input
               type="text"
               value={formData.brand}
@@ -1071,7 +1080,7 @@ function ProductModal({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">?´ë?ì§€ URL</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">ÀÌ¹ÌÁö URL</label>
             <input
               type="text"
               value={formData.imageUrl}
@@ -1084,7 +1093,7 @@ function ProductModal({
 
           <div className="grid grid-cols-3 gap-2">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">?¬ì¸??/label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Æ÷ÀÎÆ®</label>
               <input
                 type="number"
                 value={formData.points}
@@ -1096,7 +1105,7 @@ function ProductModal({
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                ê°€ì¤‘ì¹˜ (?ë????¹ì²¨ ?•ë¥ )
+                °¡ÁßÄ¡ (»ó´ëÀû ´çÃ· È®·ü)
               </label>
               <input
                 type="number"
@@ -1107,12 +1116,12 @@ function ProductModal({
                 required
               />
               <p className="text-xs text-gray-500 mt-1">
-                ?’¡ ?„ì²´ ?©ê³„ê°€ 100???„ìš” ?†ìŠµ?ˆë‹¤. ?? 3, 2, 5 ?…ë ¥ ????30%, 20%, 50% ?•ë¥ 
+                ?? ÀüÃ¼ ÇÕ°è°¡ 100ÀÏ ÇÊ¿ä ¾ø½À´Ï´Ù. ¿¹: 3, 2, 5 ÀÔ·Â ½Ã ¡æ 30%, 20%, 50% È®·ü
               </p>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">?¬ê³ </label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Àç°í</label>
               <input
                 type="number"
                 value={formData.stock}
@@ -1128,14 +1137,14 @@ function ProductModal({
               type="submit"
               className="flex-1 bg-black text-white py-2 rounded hover:bg-gray-800"
             >
-              {product ? '?˜ì •' : 'ì¶”ê?'}
+              {product ? '¼öÁ¤' : 'Ãß°¡'}
             </button>
             <button
               type="button"
               onClick={onClose}
               className="flex-1 bg-gray-200 text-gray-800 py-2 rounded hover:bg-gray-300"
             >
-              ?«ê¸°
+              ´İ±â
             </button>
           </div>
         </form>
@@ -1145,7 +1154,8 @@ function ProductModal({
 }
 
 // ============================================
-// ??‚¤?œë¡œ????// ============================================
+// ·°Å°µå·Î¿ì ÅÇ
+// ============================================
 function LuckyDrawsTab({ isAuthenticated }: { isAuthenticated: boolean }) {
   const [luckyDraws, setLuckyDraws] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -1161,7 +1171,7 @@ function LuckyDrawsTab({ isAuthenticated }: { isAuthenticated: boolean }) {
     try {
       const headers = getAuthHeaders();
       if (!headers) {
-        alert('???¸ì¦ ?•ë³´ê°€ ?†ìŠµ?ˆë‹¤. ?¤ì‹œ ë¡œê·¸?¸í•´ì£¼ì„¸??');
+        alert('? ÀÎÁõ Á¤º¸°¡ ¾ø½À´Ï´Ù. ´Ù½Ã ·Î±×ÀÎÇØÁÖ¼¼¿ä.');
         setLoading(false);
         return;
       }
@@ -1176,26 +1186,26 @@ function LuckyDrawsTab({ isAuthenticated }: { isAuthenticated: boolean }) {
       
       if (!response.ok) {
         console.error('Admin API error:', data);
-        alert(`??ê´€ë¦¬ì ê¶Œí•œ???†ìŠµ?ˆë‹¤: ${data.error || response.statusText}`);
+        alert(`? °ü¸®ÀÚ ±ÇÇÑÀÌ ¾ø½À´Ï´Ù: ${data.error || response.statusText}`);
         return;
       }
       
       setLuckyDraws(data.luckyDraws || []);
     } catch (error) {
       console.error('Error fetching lucky draws:', error);
-      alert(`???ëŸ¬: ${error}`);
+      alert(`? ¿¡·¯: ${error}`);
     } finally {
       setLoading(false);
     }
   };
 
   const handleDrawWinner = async (luckyDrawId: string) => {
-    if (!confirm('?¹ì²¨?ë? ì¶”ì²¨?˜ì‹œê² ìŠµ?ˆê¹Œ?')) return;
+    if (!confirm('´çÃ·ÀÚ¸¦ ÃßÃ·ÇÏ½Ã°Ú½À´Ï±î?')) return;
 
     try {
       const headers = getAuthHeaders();
       if (!headers) {
-        alert('???¸ì¦ ?•ë³´ê°€ ?†ìŠµ?ˆë‹¤. ?¤ì‹œ ë¡œê·¸?¸í•´ì£¼ì„¸??');
+        alert('? ÀÎÁõ Á¤º¸°¡ ¾ø½À´Ï´Ù. ´Ù½Ã ·Î±×ÀÎÇØÁÖ¼¼¿ä.');
         return;
       }
       
@@ -1210,44 +1220,44 @@ function LuckyDrawsTab({ isAuthenticated }: { isAuthenticated: boolean }) {
       const data = await response.json();
 
       if (data.success) {
-        alert(`?‰ ?¹ì²¨?? ${data.winner.userName} (ì´?${data.totalParticipants}ëª?ì°¸ì—¬)`);
+        alert(`?? ´çÃ·ÀÚ: ${data.winner.userName} (ÃÑ ${data.totalParticipants}¸í Âü¿©)`);
         fetchLuckyDraws();
       } else {
-        alert(`???¤íŒ¨: ${data.error}`);
+        alert(`? ½ÇÆĞ: ${data.error}`);
       }
     } catch (error) {
-      alert(`???ëŸ¬: ${error}`);
+      alert(`? ¿¡·¯: ${error}`);
     }
   };
 
   if (loading) {
-    return <div className="text-center py-12">ë¡œë”© ì¤?..</div>;
+    return <div className="text-center py-12">·Îµù Áß...</div>;
   }
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-gray-900">??‚¤?œë¡œ??ê´€ë¦?/h2>
+        <h2 className="text-2xl font-bold text-gray-900">·°Å°µå·Î¿ì °ü¸®</h2>
         <button
           onClick={() => setShowAddModal(true)}
           className="px-4 py-2 bg-black text-white rounded hover:bg-gray-800"
         >
-          + ??‚¤?œë¡œ??ì¶”ê?
+          + ·°Å°µå·Î¿ì Ãß°¡
         </button>
       </div>
 
       {luckyDraws.length === 0 ? (
         <div className="bg-white shadow rounded-lg p-12 text-center">
-          <div className="text-6xl mb-4">?²</div>
-          <h3 className="text-lg font-medium text-gray-900 mb-2">?±ë¡????‚¤?œë¡œ?°ê? ?†ìŠµ?ˆë‹¤</h3>
+          <div className="text-6xl mb-4">??</div>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">µî·ÏµÈ ·°Å°µå·Î¿ì°¡ ¾ø½À´Ï´Ù</h3>
           <p className="text-sm text-gray-500 mb-6">
-            ?ˆë¡œ????‚¤?œë¡œ???´ë²¤?¸ë? ì¶”ê??˜ì—¬ ?¬ìš©?ë“¤?ê²Œ ?‘ëª¨ ê¸°íšŒë¥??œê³µ?˜ì„¸??
+            »õ·Î¿î ·°Å°µå·Î¿ì ÀÌº¥Æ®¸¦ Ãß°¡ÇÏ¿© »ç¿ëÀÚµé¿¡°Ô ÀÀ¸ğ ±âÈ¸¸¦ Á¦°øÇÏ¼¼¿ä.
           </p>
           <button
             onClick={() => setShowAddModal(true)}
             className="px-6 py-3 bg-black text-white rounded-lg hover:bg-gray-800 font-medium"
           >
-            ì²???‚¤?œë¡œ??ì¶”ê??˜ê¸°
+            Ã¹ ·°Å°µå·Î¿ì Ãß°¡ÇÏ±â
           </button>
         </div>
       ) : (
@@ -1263,7 +1273,7 @@ function LuckyDrawsTab({ isAuthenticated }: { isAuthenticated: boolean }) {
                 <div className="flex-1">
                   <h3 className="font-bold text-gray-900">{draw.name}</h3>
                   <p className="text-sm text-gray-500">{draw.brand}</p>
-                  <p className="text-sm text-gray-500">ì°¸ì—¬: {draw.entryPoints.toLocaleString()}P</p>
+                  <p className="text-sm text-gray-500">Âü¿©: {draw.entryPoints.toLocaleString()}P</p>
                 </div>
               </div>
               <div className="flex gap-2">
@@ -1271,7 +1281,7 @@ function LuckyDrawsTab({ isAuthenticated }: { isAuthenticated: boolean }) {
                   onClick={() => handleDrawWinner(draw.id)}
                   className="flex-1 bg-green-600 text-white py-2 rounded hover:bg-green-700 text-sm"
                 >
-                  ?² ì¶”ì²¨?˜ê¸°
+                  ?? ÃßÃ·ÇÏ±â
                 </button>
               </div>
             </div>
@@ -1289,7 +1299,7 @@ function LuckyDrawsTab({ isAuthenticated }: { isAuthenticated: boolean }) {
   );
 }
 
-// ??‚¤?œë¡œ??ì¶”ê? ëª¨ë‹¬
+// ·°Å°µå·Î¿ì Ãß°¡ ¸ğ´Ş
 function LuckyDrawModal({
   onClose,
   onSuccess,
@@ -1312,7 +1322,7 @@ function LuckyDrawModal({
     try {
       const headers = getAuthHeaders();
       if (!headers) {
-        alert('???¸ì¦ ?•ë³´ê°€ ?†ìŠµ?ˆë‹¤. ?¤ì‹œ ë¡œê·¸?¸í•´ì£¼ì„¸??');
+        alert('? ÀÎÁõ Á¤º¸°¡ ¾ø½À´Ï´Ù. ´Ù½Ã ·Î±×ÀÎÇØÁÖ¼¼¿ä.');
         return;
       }
       
@@ -1331,25 +1341,25 @@ function LuckyDrawModal({
       const data = await response.json();
 
       if (data.success) {
-        alert('????‚¤?œë¡œ?°ê? ì¶”ê??˜ì—ˆ?µë‹ˆ??');
+        alert('? ·°Å°µå·Î¿ì°¡ Ãß°¡µÇ¾ú½À´Ï´Ù.');
         onSuccess();
         onClose();
       } else {
-        alert(`???¤íŒ¨: ${data.error}`);
+        alert(`? ½ÇÆĞ: ${data.error}`);
       }
     } catch (error) {
-      alert(`???ëŸ¬: ${error}`);
+      alert(`? ¿¡·¯: ${error}`);
     }
   };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-        <h3 className="text-lg font-bold mb-4">??‚¤?œë¡œ??ì¶”ê?</h3>
+        <h3 className="text-lg font-bold mb-4">·°Å°µå·Î¿ì Ãß°¡</h3>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">?í’ˆëª?/label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">»óÇ°¸í</label>
             <input
               type="text"
               value={formData.name}
@@ -1360,7 +1370,7 @@ function LuckyDrawModal({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">ë¸Œëœ??/label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">ºê·£µå</label>
             <input
               type="text"
               value={formData.brand}
@@ -1371,7 +1381,7 @@ function LuckyDrawModal({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">?´ë?ì§€ URL</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">ÀÌ¹ÌÁö URL</label>
             <input
               type="text"
               value={formData.imageUrl}
@@ -1382,7 +1392,7 @@ function LuckyDrawModal({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">ì°¸ì—¬ ?¬ì¸??/label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Âü¿© Æ÷ÀÎÆ®</label>
             <input
               type="number"
               value={formData.entryPoints}
@@ -1397,14 +1407,14 @@ function LuckyDrawModal({
               type="submit"
               className="flex-1 bg-black text-white py-2 rounded hover:bg-gray-800"
             >
-              ì¶”ê?
+              Ãß°¡
             </button>
             <button
               type="button"
               onClick={onClose}
               className="flex-1 bg-gray-200 text-gray-800 py-2 rounded hover:bg-gray-300"
             >
-              ?«ê¸°
+              ´İ±â
             </button>
           </div>
         </form>
