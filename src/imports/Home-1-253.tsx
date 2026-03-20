@@ -1,14 +1,14 @@
 import { Link as RouterLink } from "react-router";
 import { useState, useEffect } from "react";
 import svgPaths from "./svg-njoq4gzm16";
-import img470 from "figma:asset/8196bc965d008081e9d4303c0fdf4b5562e07ad1.png";
-import img468 from "figma:asset/6d239e62119a6331f715fe267c8cb5bcf15745d6.png";
-import img467 from "figma:asset/9152485ec268fd3e2f7e4678a722ae075f0bd887.png";
-import img464 from "figma:asset/647c3c21ac6634534afa7150ab9d6d202fb686b3.png";
 import imgBanner1 from "figma:asset/805896226fd2f028ef2a11adc5383356de68c2b1.png";
 import { apiBase, publicAnonKey } from '../../utils/supabase/info';
 
 const BRAND_LOGO_URL = "https://dbase01.cafe24.com/box_logo.png";
+const PLATINUM_BOX_IMAGE_URL = "https://dbase01.cafe24.com/Centbox/Platinum_component.png";
+const DIAMOND_BOX_IMAGE_URL = "https://dbase01.cafe24.com/Centbox/diamond_component.png";
+const GOLD_BOX_IMAGE_URL = "https://dbase01.cafe24.com/Centbox/gold_component.png";
+const RUBY_BOX_IMAGE_URL = "https://dbase01.cafe24.com/Centbox/ruby_component.png";
 
 // 🔥 관리자가 선택한 메인 상품을 보여주는 ProductShowcase
 function ProductShowcase() {
@@ -404,28 +404,28 @@ export default function Home() {
       </div>
       <ProductShowcase />
       <RouterLink to="/ticket/gold" className="absolute h-[139px] left-[25px] top-[1155px] w-[434px] cursor-pointer z-10" data-name="456">
-        <img alt="골드 박스" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full" src={img464} />
+        <img alt="골드 박스" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full" src={GOLD_BOX_IMAGE_URL} />
       </RouterLink>
       <RouterLink to="/ticket/diamond" className="absolute h-[139px] left-[25px] top-[1003px] w-[434px] cursor-pointer z-10" data-name="458">
-        <img alt="다이아 박스" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full" src={img470} />
+        <img alt="다이아 박스" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full" src={DIAMOND_BOX_IMAGE_URL} />
       </RouterLink>
       <div className="absolute h-[139px] left-[25px] top-[851px] w-[434px]" data-name="459">
-        <img alt="" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full" src={img467} />
+        <img alt="" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full" src={PLATINUM_BOX_IMAGE_URL} />
       </div>
       <RouterLink to="/ticket/platinum" className="absolute h-[139px] left-[25px] top-[851px] w-[434px] cursor-pointer z-10" data-name="467">
-        <img alt="플래티넘 박스" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full" src={img467} />
+        <img alt="플래티넘 박스" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full" src={PLATINUM_BOX_IMAGE_URL} />
       </RouterLink>
       <div className="absolute h-[139px] left-[25px] top-[1003px] w-[434px]" data-name="466">
-        <img alt="" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full" src={img470} />
+        <img alt="" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full" src={DIAMOND_BOX_IMAGE_URL} />
       </div>
       <RouterLink to="/ticket/ruby" className="absolute h-[139px] left-[25px] top-[1307px] w-[434px] cursor-pointer z-10" data-name="468">
-        <img alt="루비 박스" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full" src={img468} />
+        <img alt="루비 박스" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full" src={RUBY_BOX_IMAGE_URL} />
       </RouterLink>
       <div className="absolute h-[139px] left-[25px] top-[1155px] w-[434px]" data-name="464">
-        <img alt="" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full" src={img464} />
+        <img alt="" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full" src={GOLD_BOX_IMAGE_URL} />
       </div>
       <div className="absolute h-[139px] left-[25px] top-[1307px] w-[434px]" data-name="457">
-        <img alt="" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full" src={img468} />
+        <img alt="" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full" src={RUBY_BOX_IMAGE_URL} />
       </div>
       <div className="-translate-y-1/2 absolute flex flex-col font-['Pretendard:Bold',sans-serif] justify-center leading-[0] left-[25px] not-italic text-[#020202] text-[23px] top-[813.5px] tracking-[1.38px] whitespace-nowrap">
         <p className="leading-[normal]">
