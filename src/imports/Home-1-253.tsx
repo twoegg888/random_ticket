@@ -404,28 +404,28 @@ export default function Home() {
       </div>
       <ProductShowcase />
       <RouterLink to="/ticket/gold" className="absolute h-[139px] left-[25px] top-[1155px] w-[434px] cursor-pointer z-10" data-name="456">
-        <img alt="골드 박스" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full" src={GOLD_BOX_IMAGE_URL} />
+        <img alt="골드 박스" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full shadow-[0_10px_24px_0_#f7f7f7]" src={GOLD_BOX_IMAGE_URL} />
       </RouterLink>
       <RouterLink to="/ticket/diamond" className="absolute h-[139px] left-[25px] top-[1003px] w-[434px] cursor-pointer z-10" data-name="458">
-        <img alt="다이아 박스" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full" src={DIAMOND_BOX_IMAGE_URL} />
+        <img alt="다이아 박스" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full shadow-[0_10px_24px_0_#f7f7f7]" src={DIAMOND_BOX_IMAGE_URL} />
       </RouterLink>
       <div className="absolute h-[139px] left-[25px] top-[851px] w-[434px]" data-name="459">
-        <img alt="" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full" src={PLATINUM_BOX_IMAGE_URL} />
+        <img alt="" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full shadow-[0_10px_24px_0_#f7f7f7]" src={PLATINUM_BOX_IMAGE_URL} />
       </div>
       <RouterLink to="/ticket/platinum" className="absolute h-[139px] left-[25px] top-[851px] w-[434px] cursor-pointer z-10" data-name="467">
-        <img alt="플래티넘 박스" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full" src={PLATINUM_BOX_IMAGE_URL} />
+        <img alt="플래티넘 박스" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full shadow-[0_10px_24px_0_#f7f7f7]" src={PLATINUM_BOX_IMAGE_URL} />
       </RouterLink>
       <div className="absolute h-[139px] left-[25px] top-[1003px] w-[434px]" data-name="466">
-        <img alt="" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full" src={DIAMOND_BOX_IMAGE_URL} />
+        <img alt="" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full shadow-[0_10px_24px_0_#f7f7f7]" src={DIAMOND_BOX_IMAGE_URL} />
       </div>
       <RouterLink to="/ticket/ruby" className="absolute h-[139px] left-[25px] top-[1307px] w-[434px] cursor-pointer z-10" data-name="468">
-        <img alt="루비 박스" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full" src={RUBY_BOX_IMAGE_URL} />
+        <img alt="루비 박스" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full shadow-[0_10px_24px_0_#f7f7f7]" src={RUBY_BOX_IMAGE_URL} />
       </RouterLink>
       <div className="absolute h-[139px] left-[25px] top-[1155px] w-[434px]" data-name="464">
-        <img alt="" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full" src={GOLD_BOX_IMAGE_URL} />
+        <img alt="" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full shadow-[0_10px_24px_0_#f7f7f7]" src={GOLD_BOX_IMAGE_URL} />
       </div>
       <div className="absolute h-[139px] left-[25px] top-[1307px] w-[434px]" data-name="457">
-        <img alt="" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full" src={RUBY_BOX_IMAGE_URL} />
+        <img alt="" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full shadow-[0_10px_24px_0_#f7f7f7]" src={RUBY_BOX_IMAGE_URL} />
       </div>
       <div className="-translate-y-1/2 absolute flex flex-col font-['Pretendard:Bold',sans-serif] justify-center leading-[0] left-[25px] not-italic text-[#020202] text-[23px] top-[813.5px] tracking-[1.38px] whitespace-nowrap">
         <p className="leading-[normal]">
