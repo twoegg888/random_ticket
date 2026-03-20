@@ -5,10 +5,10 @@ import imgBanner1 from "figma:asset/805896226fd2f028ef2a11adc5383356de68c2b1.png
 import { apiBase, publicAnonKey } from '../../utils/supabase/info';
 
 const BRAND_LOGO_URL = "https://dbase01.cafe24.com/box_logo.png";
-const PLATINUM_BOX_IMAGE_URL = "https://dbase01.cafe24.com/Centbox/Platinum_component.png";
-const DIAMOND_BOX_IMAGE_URL = "https://dbase01.cafe24.com/Centbox/diamond_component.png";
-const GOLD_BOX_IMAGE_URL = "https://dbase01.cafe24.com/Centbox/gold_component.png";
-const RUBY_BOX_IMAGE_URL = "https://dbase01.cafe24.com/Centbox/ruby_component.png";
+const PLATINUM_BOX_IMAGE_URL = "https://dbase01.cafe24.com/centbox/pla%20box.png";
+const DIAMOND_BOX_IMAGE_URL = "https://dbase01.cafe24.com/centbox/dia%20box.png";
+const GOLD_BOX_IMAGE_URL = "https://dbase01.cafe24.com/centbox/gold%20box.png";
+const RUBY_BOX_IMAGE_URL = "https://dbase01.cafe24.com/centbox/rubybox.png";
 
 // 🔥 관리자가 선택한 메인 상품을 보여주는 ProductShowcase
 function ProductShowcase() {
