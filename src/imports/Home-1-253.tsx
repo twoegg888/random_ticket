@@ -474,7 +474,6 @@ export default function Home() {
         <img alt="" className="absolute inset-0 max-w-none object-cover pointer-events-none rounded-[12px] size-full" src={imgBanner1} />
       </div>
       <BackgroundHorizontalBorder />
-      <Group2 />
     </div>
   );
 }
